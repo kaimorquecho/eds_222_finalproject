@@ -1,0 +1,28 @@
+﻿Identifier: MEX-INEGI.ESD1.07-ENDISEG-WEB-2022
+
+Title: Encuesta Nacional sobre Diversidad Sexual y de Género Web (ENDISEG WEB) 2022. Datos oportunos
+
+Description: Encuesta Nacional sobre Diversidad Sexual y de Género WEB (ENDISEG WEB) 2022, es una encuesta de tipo cualitativa dirigida a la población de 15 años y más interesada en las temáticas de orientación sexual e identidad de género,
+y en específico dirigida a buscar la participación de la población LGBTI+ y conocer sobre sus características personales, experiencias y condiciones de vida.
+
+Modified: 2022-06-28
+
+Publisher: Instituto Nacional de Estadística y Geografía, INEGI
+
+Mbox: atencion.usuarios@inegi.org.mx
+
+License: https://www.inegi.org.mx/inegi/terminos.html 
+
+DataDictionary:
+
+Keyword: "Autoidentificación", "Binarismo", "Cisgénero", "Discriminación", "Emocional", "Encuesta", "Eudaimónico", "Gay", "Genderqueer", "Género", "Hogar", "Identidad", "Lesbiana", "LGBTI+", "Orientación", "OSIG", "Pansexualidad", "Población", "Queer", "Salud", "Sexualidad", "Transexual", "Transgénero", "Travesti"
+
+ContactPoint: Mtro. J. Armando Aguiar Rodríguez, 800 111 4634
+
+Temporal: 2022-02-21-2022-04-21
+
+Spatial: Estados Unidos Mexicanos
+
+AccrualPeriodicity: No definida
+
+Distribution: https://www.inegi.org.mx/investigacion/endiseg/2022/
