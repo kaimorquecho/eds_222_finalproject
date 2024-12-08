@@ -11,14 +11,33 @@ library(here)
 ```
 
 ```{r}
-ensanut_2016 <- read_csv(here("data","ensanut_2016","nutri_segalim_procesada_14112016.csv"))
+data <- read_csv(here("data","food_affordability_2006_2010.csv"))
+```
 
-endiseg_2021_a <- read_csv(here("data","endiseg_2022","conjunto_de_datos_tapart_a_endiseg_web_2022.csv"))
-                           
-endiseg_2021_b <- read_csv(here("data","endiseg_2022","conjunto_de_datos_tapart_b_endiseg_web_2022.csv"))
+```{r}
 
-endiseg_2021 <- bind_cols(endiseg_2022_b, endiseg_2022_a)
+data <- data %>%
+  drop_na()
+
+
+# response variable = affordability ratio
+# independent variables / predictors
+# county - but must drop NAs (136)
+# median_income
+# average family size
+
+
+
+
+
 ```
 
 #### Hypothesis:
-Food insecurity will be highest in the states with the highest percentage of gender-non conforming individuals. 
+median income, family size 
+female-headed households
+
+
+POLR regression 
+formula , supply data, 
+socioeconomic status as predictor 
+food safety as response 
