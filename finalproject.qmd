@@ -12,16 +12,19 @@ library(here)
 
 ```{r}
 food <- read_csv(here("data","food_affordability_2006_2010.csv"))
+counties <- read.csv(here("data","california_counties.csv"))
 ```
 
 ```{r}
 # decided to drop NAs because many missing obs for independent variables. data is from various survey data compiled to make 1
 food <- food %>%
-  drop_na() %>%
+  filter(!is.na(affordability_ratio)) %>%
+  filter(!(race_eth_name %in% c("Total", "Other", "AIAN", "NHOPI", "Multiple"))) %>%
   select(-region_name)
+```
 
-counties <- read.csv(here("data","california_counties.csv"))
 
+```{r}
 # classify counties by region to make 5 level categorical variable
 
 superior <- c("Butte","Colusa","Del Norte","Glenn","Humboldt","Lake","Lassen","Mendocino","Modoc","Nevada","Plumas","Shasta", "Sierra","Siskiyou","Tehama","Trinity")
@@ -45,10 +48,12 @@ food <- inner_join(food, region_mapping, by = "county_name")
 ```
 
 ```{r}
-food_lm <- lm(affordability_ratio ~ ave_fam_size + region_name , data = food)
+food_lm <- lm(affordability_ratio ~ ave_fam_size + race_eth_name, data = food)
+# r squared lower when accounting for race 
+# should try removing the outliers in median_income and affordability food ratio
+# 
 
 summary(food_lm)
-
 ```
 
 
