@@ -11,33 +11,56 @@ library(here)
 ```
 
 ```{r}
-data <- read_csv(here("data","food_affordability_2006_2010.csv"))
+food <- read_csv(here("data","food_affordability_2006_2010.csv"))
 ```
 
 ```{r}
+# decided to drop NAs because many missing obs for independent variables. data is from various survey data compiled to make 1
+food <- food %>%
+  drop_na() %>%
+  select(-region_name)
 
-data <- data %>%
-  drop_na()
+counties <- read.csv(here("data","california_counties.csv"))
+
+# classify counties by region to make 5 level categorical variable
+
+superior <- c("Butte","Colusa","Del Norte","Glenn","Humboldt","Lake","Lassen","Mendocino","Modoc","Nevada","Plumas","Shasta", "Sierra","Siskiyou","Tehama","Trinity")
+
+central <- c("Alpine","Amador","El Dorado","Fresno","Inyo","Kings","Madera","Mariposa","Merced","Mono","Placer","Sacramento","San Joaquin","Stanislaus","Sutter","Yuba","Tulare","Tuolumne","Yolo", "Calaveras")
+
+bay_area <- c("Almeda","Contra Costa","Marin","Monterey","Napa","San Benito","San Fracisco","San Mateo","Santa Clara","Santa Cruz","Solano","Sonoma")
+
+southern <- c("Imperial","Kern","Orange","Riverside","San Bernardino","San Diego","San Luis Obispo","Santa Barbara","Ventura")
+
+los_angeles <- "Los Angeles"
+```
+
+```{r}
+region_mapping <- data.frame(
+  county_name = c(superior, central, bay_area, southern, los_angeles),
+  region_name = rep(c('superior', 'central', 'bay_area', 'southern','los_angeles'), 
+               times = c(length(superior), length(central), length(bay_area), length(southern),length(los_angeles))))
+
+food <- inner_join(food, region_mapping, by = "county_name")
+```
+
+```{r}
+food_lm <- lm(affordability_ratio ~ ave_fam_size + region_name , data = food)
+
+summary(food_lm)
+
+```
 
 
 # response variable = affordability ratio
 # independent variables / predictors
-# county - but must drop NAs (136)
-# median_income
-# average family size
-
-
-
-
-
-```
+# county - but must drop NAs (136) <- categorical
+# median_income <- numerical 
+# average family size <- numerical 
 
 #### Hypothesis:
 median income, family size 
 female-headed households
 
 
-POLR regression 
-formula , supply data, 
-socioeconomic status as predictor 
-food safety as response 
+
