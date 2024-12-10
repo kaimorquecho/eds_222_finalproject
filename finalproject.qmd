@@ -9,6 +9,7 @@ library(tidyverse)
 library(ggplot2)
 library(here)
 library(kableExtra)
+library(car)
 ```
 
 ```{r}
@@ -49,21 +50,22 @@ food <- inner_join(food, region_mapping, by = "county_name")
 ```
 
 ```{r}
-food_cost_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size + region_name * median_income, data = food)
+cost_fam_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size + region_name * median_income, data = food)
 # r squared lower when accounting for race 
 # should try removing the outliers in median_income and affordability food ratio
 # in "ave_fam_size" all races are combined, race variable not ideal in model
 
-summary(food_cost_lm)
+summary(cost_fam_lm)
 ```
 
 ```{r}
-food_cost_lm <- lm(cost_yr ~ median_income + region_name + region_name * median_income, data = food)
+cost_fam_race_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size + region_name * median_income + median_income * race_eth_name, data = food)
+
 # r squared lower when accounting for race 
 # should try removing the outliers in median_income and affordability food ratio
 # in "ave_fam_size" all races are combined, race variable not ideal in model
 
-summary(food_cost_lm)
+summary(cost_fam_race_lm)
 ```
 
 ```{r}
@@ -79,8 +81,7 @@ ggplot(food, aes(x = median_income)) +
 ```
 
 ```{r}
-library(car)
-vif_results <- vif(food_cost_lm) 
+vif_results <- vif(cost_fam_lm) 
 vif_results %>%
   as.data.frame()
 
@@ -88,8 +89,6 @@ vif_table <- vif_results %>%
   kable("html", col.names = c("Variable", "GVIF", "Degrees of freedom", "Adjusted GVIF")) %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed")) %>%
   print()
-
-
 
 ```
 
