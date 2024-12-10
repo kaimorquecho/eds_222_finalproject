@@ -4,12 +4,18 @@ format: html
 editor_options: 
   chunk_output_type: console
 ---
+
+```{r}
+install.packages("broom")
+```
+
 ```{r}
 library(tidyverse)
 library(ggplot2)
 library(here)
 library(kableExtra)
 library(car)
+library(broom)
 ```
 
 ```{r}
@@ -17,17 +23,19 @@ food <- read_csv(here("data","food_affordability_2006_2010.csv"))
 counties <- read.csv(here("data","california_counties.csv"))
 ```
 
+
+#### Data Cleaning 
+
 ```{r}
-# decided to drop NAs because many missing obs for independent variables. data is from various survey data compiled to make 1
 food <- food %>%
-  filter(!is.na(affordability_ratio)) %>%
-  # filter(!(race_eth_name %in% c("Total", "Other", "AIAN", "NHOPI", "Multiple", "Asian"))) %>%
-  select(-region_name)
+ filter(!is.na(median_income)) %>% # removed all median_income NAs as they are crucial for lm 
+  select(-region_name) # removed MPO region names
 ```
 
 
 ```{r}
 # classify counties by region to make 5 level categorical variable
+# if I had used the region_name col from original data the categorical variable would have 15 levels, as opposed to 5 if I follow the MPO region designations (Metropolitan Planning Organization)
 
 superior <- c("Butte","Colusa","Del Norte","Glenn","Humboldt","Lake","Lassen","Mendocino","Modoc","Nevada","Plumas","Shasta", "Sierra","Siskiyou","Tehama","Trinity")
 
@@ -38,34 +46,28 @@ bay_area <- c("Almeda","Contra Costa","Marin","Monterey","Napa","San Benito","Sa
 southern <- c("Imperial","Kern","Orange","Riverside","San Bernardino","San Diego","San Luis Obispo","Santa Barbara","Ventura")
 
 los_angeles <- "Los Angeles"
-```
 
-```{r}
 region_mapping <- data.frame(
   county_name = c(superior, central, bay_area, southern, los_angeles),
   region_name = rep(c('superior', 'central', 'bay_area', 'southern','los_angeles'), 
                times = c(length(superior), length(central), length(bay_area), length(southern),length(los_angeles))))
 
-food <- inner_join(food, region_mapping, by = "county_name")
+food <- inner_join(food,
+                   region_mapping,
+                   by = "county_name")
 ```
 
 ```{r}
 cost_fam_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size + region_name * median_income, data = food)
-# r squared lower when accounting for race 
 # should try removing the outliers in median_income and affordability food ratio
 # in "ave_fam_size" all races are combined, race variable not ideal in model
 
-summary(cost_fam_lm)
-```
-
-```{r}
-cost_fam_race_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size + region_name * median_income + median_income * race_eth_name, data = food)
-
-# r squared lower when accounting for race 
-# should try removing the outliers in median_income and affordability food ratio
-# in "ave_fam_size" all races are combined, race variable not ideal in model
-
-summary(cost_fam_race_lm)
+cost_fam_summary <- tidy(cost_fam_lm) %>%
+  kable() %>%
+  kable_styling(full_width = FALSE,
+                bootstrap_options = "bordered",
+                html_font = "courier") %>%
+  print()
 ```
 
 ```{r}
@@ -80,6 +82,7 @@ ggplot(food, aes(x = median_income)) +
         panel.background = element_rect(colour = "white"))
 ```
 
+#### Run a VIF to detect multicollinearity, if present
 ```{r}
 vif_results <- vif(cost_fam_lm) 
 vif_results %>%
@@ -87,9 +90,10 @@ vif_results %>%
 
 vif_table <- vif_results %>%
   kable("html", col.names = c("Variable", "GVIF", "Degrees of freedom", "Adjusted GVIF")) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed")) %>%
+  kable_styling(full_width = FALSE,
+                bootstrap_options = "bordered",
+                html_font = "courier") %>%
   print()
-
 ```
 
 # response variable = affordability ratio
