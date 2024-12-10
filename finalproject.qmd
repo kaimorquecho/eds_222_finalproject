@@ -1,5 +1,5 @@
 ---
-title: "final_project"
+title: "Regional analysis of food costs in female-headed households"
 date: last-modified
 execute: 
   eval: true
@@ -26,7 +26,9 @@ food <- read_csv(here("data","food_affordability_2006_2010.csv"))
 counties <- read.csv(here("data","california_counties.csv"))
 ```
 
-#### Data Cleaning 
+#### Data Cleaning
+
+Drop NAs for median income and visualize min and max to see if outliers must be removed
 
 ```{r}
 food <- food %>%
@@ -46,30 +48,31 @@ income_hist <- ggplot(food, aes(x = median_income)) +
         panel.background = element_rect(colour = "skyblue")) 
 
 income_hist
+
+cost_hist <- ggplot(food, aes(x = cost_yr)) +
+  geom_histogram(binwidth = 5000, fill = "firebrick2", color = "white") +
+  labs(title = "Histogram of food cost", 
+       x = "Food cost", 
+       y = "Frequency") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"),
+        panel.background = element_rect(colour = "skyblue")) 
+
+cost_hist
 ```
 
-```{r}
-summary(food$cost_yr) %>%
-  kable() %>%
-  kable_styling(full_width = FALSE,
-                bootstrap_options = "bordered",
-                html_font = "courier") %>%
 
-summary(food$median_income) %>%
-  kable() %>%
-  kable_styling(full_width = FALSE,
-                bootstrap_options = "bordered",
-                html_font = "courier") %>%
+```{r}
+summary(food$cost_yr) 
+summary(food$median_income) 
 
 food <- food %>% 
-  filter(median_income < 125000) 
-
+  filter(median_income < 110000) 
 ```
 
-```{r}
-# classify counties by region to make 5 level categorical variable
-# if I had used the region_name col from original data the categorical variable would have 15 levels, as opposed to 5 if I follow the MPO region designations (Metropolitan Planning Organization)
+Reclassify counties into 5 regions, not 15
 
+```{r}
 superior <- c("Butte","Colusa","Del Norte","Glenn","Humboldt","Lake","Lassen","Mendocino","Modoc","Nevada","Plumas","Shasta", "Sierra","Siskiyou","Tehama","Trinity")
 
 central <- c("Alpine","Amador","El Dorado","Fresno","Inyo","Kings","Madera","Mariposa","Merced","Mono","Placer","Sacramento","San Joaquin","Stanislaus","Sutter","Yuba","Tulare","Tuolumne","Yolo", "Calaveras")
@@ -90,10 +93,10 @@ food <- inner_join(food,
                    by = "county_name")
 ```
 
+#### Apply lm model where independent variable is food cost, predictors are region, avg. family size and interaction between region and median income
+
 ```{r results='asis'}
 cost_fam_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size + region_name * median_income, data = food)
-# should try removing the outliers in median_income and affordability food ratio
-# in "ave_fam_size" all races are combined, race variable not ideal in model
 
 cost_fam_summary <- tidy(cost_fam_lm) %>%
   kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
@@ -103,7 +106,22 @@ cost_fam_summary <- tidy(cost_fam_lm) %>%
   print()
 ```
 
+```{r}
+plot1 <- ggplot(food, aes(region_name, fill = cost_yr)) +
+  geom_bar(fill = "firebrick3",
+             color = "skyblue2",
+             shape = 19) +
+  theme_bw() +
+   theme(text = element_text(family = "courier")) +
+  ylab("Food cost") +
+  xlab("Region") + 
+  ggtitle("Food cost vs region") 
+ 
+plot1
+```
+
 #### Run a VIF to detect multicollinearity, if present
+
 ```{r results='asis'}
 vif_results <- vif(cost_fam_lm) 
 vif_results %>%
@@ -117,18 +135,243 @@ vif_table <- vif_results %>%
   print()
 ```
 
+#### Testing the null hypothesis
+
+-   Null Hypothesis (H0): Region does not have a significant effect on food cost.
+
+-   Alternative Hypothesis (H1): Region does have a significant effect on food cost.
+
+```{r}
+cost_summary <- food %>%
+  group_by(region_name) %>%
+  summarize(median_cost = median(cost_yr, na.rm = TRUE))
+
+# Calculate the point estimate of the difference in median income between two regions
+point_estimate_cost <- cost_summary$median_cost[2] - cost_summary$median_cost[1]
+
+point_estimate_cost
+
+```
+
+#### Randomization test
+
+```{r}
+# Set the seed for reproducibility
+set.seed(123)
+
+# Create the null distribution with 1000 permutations
+null_dist <- replicate(1000, {
+  # Shuffle the cost values across all regions
+  shuffled_data <- food %>%
+    mutate(cost_yr = sample(cost_yr, n()))
+  
+
+  shuffled_summary <- shuffled_data %>%
+    group_by(region_name) %>%
+    summarize(median_cost = median(cost_yr, na.rm = TRUE))
+  
+  
+  point_estimate <- shuffled_summary$median_cost[2] - shuffled_summary$median_cost[1]
+
+  point_estimate
+})
+
+
+observed_point_estimate <- point_estimate_cost
+
+# Plot the null distribution
+ggplot(tibble(null_dist), aes(null_dist)) +
+  geom_histogram(bins = 20, color = "cornflowerblue", fill = "firebrick3") +
+  geom_vline(xintercept = observed_point_estimate, color = "firebrick3") +
+  ggtitle("Null Distribution of Median Cost Differences") +
+  xlab("Difference in Median Cost") +
+  ylab("Frequency") +
+  theme_bw() +
+   theme(text = element_text(family = "courier"))
+
+```
+
+#### Find p-value
+
+```{r}
+# Calculate the p-value
+
+p_value <- mean(abs(null_dist) >= abs(observed_point_estimate))
+options(digits = 10)  # Increase precision for the output
+print(p_value)
+```
+
+```{r}
+# Set the seed for reproducibility
+set.seed(123)
+
+# List of region pairs to test
+region_pairs <- list(
+  c("superior", "central"),
+  c("central", "bay_area"),
+  c("bay_area", "southern"),
+  c("southern", "los_angeles")
+)
+
+# Initialize a data frame to store results
+results <- tibble(
+  Region_Pair = character(),
+  Observed_Difference = numeric(),
+  P_Value = numeric()
+)
+
+# Loop through each region pair and run the test
+for (pair in region_pairs) {
+  region1 <- pair[1]
+  region2 <- pair[2]
+
+  # Calculate the observed point estimate
+  cost_summary <- food %>%
+    filter(region_name %in% c(region1, region2)) %>%
+    group_by(region_name) %>%
+    summarize(median_cost = median(cost_yr, na.rm = TRUE))
+  
+  if (nrow(cost_summary) == 2) {  # Ensure both regions are present in the data
+    observed_point_estimate <- cost_summary$median_cost[2] - cost_summary$median_cost[1]
+
+    # Create the null distribution with 1000 permutations
+    null_dist <- replicate(1000, {
+      shuffled_data <- food %>%
+        mutate(cost_yr = sample(cost_yr, n()))
+
+      shuffled_summary <- shuffled_data %>%
+        filter(region_name %in% c(region1, region2)) %>%
+        group_by(region_name) %>%
+        summarize(median_cost = median(cost_yr, na.rm = TRUE))
+
+      if (nrow(shuffled_summary) == 2) {
+        point_estimate <- shuffled_summary$median_cost[2] - shuffled_summary$median_cost[1]
+        point_estimate
+      } else {
+        NA  # In case a region is missing after shuffle, return NA
+      }
+    })
+
+    # Calculate the p-value
+    p_value <- mean(abs(null_dist) >= abs(observed_point_estimate))
+
+    # Add results to the data frame
+    results <- results %>%
+      add_row(
+        Region_Pair = paste(region1, "vs", region2),
+        Observed_Difference = observed_point_estimate,
+        P_Value = p_value
+      )
+  } else {
+    results <- results %>%
+      add_row(
+        Region_Pair = paste(region1, "vs", region2),
+        Observed_Difference = NA,
+        P_Value = NA
+      )
+  }
+}
+
+
+```
+
+```{r}
+# Set the seed for reproducibility
+set.seed(123)
+
+# List of region pairs to test
+region_pairs <- list(
+  c("superior", "central"),
+  c("central", "bay_area"),
+  c("bay_area", "southern"),
+  c("southern", "los_angeles")
+)
+
+# Initialize a data frame to store results
+results <- tibble(
+  Region_Pair = character(),
+  Observed_Difference = numeric(),
+  P_Value = numeric()
+)
+
+# Transform the cost data to log scale
+food <- food %>%
+  mutate(log_cost = log(cost_yr))
+
+# Loop through each region pair and run the test
+for (pair in region_pairs) {
+  region1 <- pair[1]
+  region2 <- pair[2]
+
+  # Calculate the observed point estimate for the log-transformed median cost
+  cost_summary <- food %>%
+    filter(region_name %in% c(region1, region2)) %>%
+    group_by(region_name) %>%
+    summarize(median_log_cost = median(log_cost, na.rm = TRUE))
+
+  if (nrow(cost_summary) == 2) {  # Ensure both regions are present in the data
+    observed_point_estimate <- cost_summary$median_log_cost[2] - cost_summary$median_log_cost[1]
+
+    # Create the null distribution with 1000 permutations
+    null_dist <- replicate(1000, {
+      shuffled_data <- food %>%
+        mutate(log_cost = sample(log_cost, n()))
+
+      shuffled_summary <- shuffled_data %>%
+        filter(region_name %in% c(region1, region2)) %>%
+        group_by(region_name) %>%
+        summarize(median_log_cost = median(log_cost, na.rm = TRUE))
+
+      if (nrow(shuffled_summary) == 2) {
+        point_estimate <- shuffled_summary$median_log_cost[2] - shuffled_summary$median_log_cost[1]
+        point_estimate
+      } else {
+        NA  # Return NA if a region is missing after shuffle
+      }
+    })
+
+    # Remove any NA values from the null distribution (e.g., when one region is missing)
+    null_dist <- na.omit(null_dist)
+
+    # Calculate the p-value
+    p_value <- mean(abs(null_dist) >= abs(observed_point_estimate))
+
+    # Add results to the data frame
+    results <- results %>%
+      add_row(
+        Region_Pair = paste(region1, "vs", region2),
+        Observed_Difference = observed_point_estimate,
+        P_Value = p_value
+      )
+  } else {
+    results <- results %>%
+      add_row(
+        Region_Pair = paste(region1, "vs", region2),
+        Observed_Difference = NA,
+        P_Value = NA
+      )
+  }
+}
+
+# Print the results
+print(results)
+
+```
+
+
 High level of multicollinearity between region and food cost, and between region and median_income but when adjusted for degrees of freedom, not severe enough to drop the predictors with the high VIF
 
+# classify counties by region to make 5 level categorical variable
 
-# response variable = affordability ratio
-# independent variables / predictors
-# county - but must drop NAs (136) <- categorical
-# median_income <- numerical 
-# average family size <- numerical 
+# if I had used the region_name col from original data the categorical variable would have 15 levels, as opposed to 5 if I follow the MPO region designations (Metropolitan Planning Organization)
+
 
 #### Hypothesis:
-median income, family size 
-female-headed households
 
+median income, family size female-headed households
 
+# should try removing the outliers in median_income and affordability food ratio
 
+# in "ave_fam_size" all races are combined, race variable not ideal in model
+
+Null Hypothesis (H0): Median income does not differ significantly across regions. Alternative Hypothesis (H1): Median income differs significantly across regions.

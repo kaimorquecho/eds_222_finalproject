@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2024-12-09">
+<meta name="dcterms.date" content="2024-12-10">
 
-<title>final_project</title>
+<title>Regional analysis of food costs in female-headed households</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -80,11 +80,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#response-variable-affordability-ratio" id="toc-response-variable-affordability-ratio" class="nav-link active" data-scroll-target="#response-variable-affordability-ratio">response variable = affordability ratio</a></li>
-  <li><a href="#independent-variables-predictors" id="toc-independent-variables-predictors" class="nav-link" data-scroll-target="#independent-variables-predictors">independent variables / predictors</a></li>
-  <li><a href="#county---but-must-drop-nas-136---categorical" id="toc-county---but-must-drop-nas-136---categorical" class="nav-link" data-scroll-target="#county---but-must-drop-nas-136---categorical">county - but must drop NAs (136) &lt;- categorical</a></li>
-  <li><a href="#median_income---numerical" id="toc-median_income---numerical" class="nav-link" data-scroll-target="#median_income---numerical">median_income &lt;- numerical</a></li>
-  <li><a href="#average-family-size---numerical" id="toc-average-family-size---numerical" class="nav-link" data-scroll-target="#average-family-size---numerical">average family size &lt;- numerical</a></li>
+  <li><a href="#classify-counties-by-region-to-make-5-level-categorical-variable" id="toc-classify-counties-by-region-to-make-5-level-categorical-variable" class="nav-link active" data-scroll-target="#classify-counties-by-region-to-make-5-level-categorical-variable">classify counties by region to make 5 level categorical variable</a></li>
+  <li><a href="#if-i-had-used-the-region_name-col-from-original-data-the-categorical-variable-would-have-15-levels-as-opposed-to-5-if-i-follow-the-mpo-region-designations-metropolitan-planning-organization" id="toc-if-i-had-used-the-region_name-col-from-original-data-the-categorical-variable-would-have-15-levels-as-opposed-to-5-if-i-follow-the-mpo-region-designations-metropolitan-planning-organization" class="nav-link" data-scroll-target="#if-i-had-used-the-region_name-col-from-original-data-the-categorical-variable-would-have-15-levels-as-opposed-to-5-if-i-follow-the-mpo-region-designations-metropolitan-planning-organization">if I had used the region_name col from original data the categorical variable would have 15 levels, as opposed to 5 if I follow the MPO region designations (Metropolitan Planning Organization)</a></li>
+  <li><a href="#should-try-removing-the-outliers-in-median_income-and-affordability-food-ratio" id="toc-should-try-removing-the-outliers-in-median_income-and-affordability-food-ratio" class="nav-link" data-scroll-target="#should-try-removing-the-outliers-in-median_income-and-affordability-food-ratio">should try removing the outliers in median_income and affordability food ratio</a></li>
+  <li><a href="#in-ave_fam_size-all-races-are-combined-race-variable-not-ideal-in-model" id="toc-in-ave_fam_size-all-races-are-combined-race-variable-not-ideal-in-model" class="nav-link" data-scroll-target="#in-ave_fam_size-all-races-are-combined-race-variable-not-ideal-in-model">in “ave_fam_size” all races are combined, race variable not ideal in model</a></li>
   </ul>
 </nav>
 </div>
@@ -92,7 +91,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">final_project</h1>
+<h1 class="title">Regional analysis of food costs in female-headed households</h1>
 </div>
 
 
@@ -103,7 +102,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 9, 2024</p>
+      <p class="date">December 10, 2024</p>
     </div>
   </div>
   
@@ -129,6 +128,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="data-cleaning" class="level4">
 <h4 class="anchored" data-anchor-id="data-cleaning">Data Cleaning</h4>
+<p>Drop NAs for median income and visualize min and max to see if outliers must be removed</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>food <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(median_income)) <span class="sc">%&gt;%</span> <span class="co"># removed all median_income NAs as they are crucial for lm </span></span>
@@ -136,14 +136,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a histogram for median_income</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(food, <span class="fu">aes</span>(<span class="at">x =</span> median_income)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>income_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(food, <span class="fu">aes</span>(<span class="at">x =</span> median_income)) <span class="sc">+</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5000</span>, <span class="at">fill =</span> <span class="st">"firebrick2"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Histogram of median income"</span>, </span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Median income"</span>, </span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Frequency"</span>) <span class="sc">+</span></span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>),</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">colour =</span> <span class="st">"white"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">colour =</span> <span class="st">"skyblue"</span>)) </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>income_hist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -151,40 +153,70 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cost_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(food, <span class="fu">aes</span>(<span class="at">x =</span> cost_yr)) <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5000</span>, <span class="at">fill =</span> <span class="st">"firebrick2"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Histogram of food cost"</span>, </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Food cost"</span>, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Frequency"</span>) <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">colour =</span> <span class="st">"skyblue"</span>)) </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>cost_hist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="finalproject_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># classify counties by region to make 5 level categorical variable</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># if I had used the region_name col from original data the categorical variable would have 15 levels, as opposed to 5 if I follow the MPO region designations (Metropolitan Planning Organization)</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>superior <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Butte"</span>,<span class="st">"Colusa"</span>,<span class="st">"Del Norte"</span>,<span class="st">"Glenn"</span>,<span class="st">"Humboldt"</span>,<span class="st">"Lake"</span>,<span class="st">"Lassen"</span>,<span class="st">"Mendocino"</span>,<span class="st">"Modoc"</span>,<span class="st">"Nevada"</span>,<span class="st">"Plumas"</span>,<span class="st">"Shasta"</span>, <span class="st">"Sierra"</span>,<span class="st">"Siskiyou"</span>,<span class="st">"Tehama"</span>,<span class="st">"Trinity"</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>central <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Alpine"</span>,<span class="st">"Amador"</span>,<span class="st">"El Dorado"</span>,<span class="st">"Fresno"</span>,<span class="st">"Inyo"</span>,<span class="st">"Kings"</span>,<span class="st">"Madera"</span>,<span class="st">"Mariposa"</span>,<span class="st">"Merced"</span>,<span class="st">"Mono"</span>,<span class="st">"Placer"</span>,<span class="st">"Sacramento"</span>,<span class="st">"San Joaquin"</span>,<span class="st">"Stanislaus"</span>,<span class="st">"Sutter"</span>,<span class="st">"Yuba"</span>,<span class="st">"Tulare"</span>,<span class="st">"Tuolumne"</span>,<span class="st">"Yolo"</span>, <span class="st">"Calaveras"</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>bay_area <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Almeda"</span>,<span class="st">"Contra Costa"</span>,<span class="st">"Marin"</span>,<span class="st">"Monterey"</span>,<span class="st">"Napa"</span>,<span class="st">"San Benito"</span>,<span class="st">"San Fracisco"</span>,<span class="st">"San Mateo"</span>,<span class="st">"Santa Clara"</span>,<span class="st">"Santa Cruz"</span>,<span class="st">"Solano"</span>,<span class="st">"Sonoma"</span>)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>southern <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Imperial"</span>,<span class="st">"Kern"</span>,<span class="st">"Orange"</span>,<span class="st">"Riverside"</span>,<span class="st">"San Bernardino"</span>,<span class="st">"San Diego"</span>,<span class="st">"San Luis Obispo"</span>,<span class="st">"Santa Barbara"</span>,<span class="st">"Ventura"</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>los_angeles <span class="ot">&lt;-</span> <span class="st">"Los Angeles"</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>region_mapping <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">county_name =</span> <span class="fu">c</span>(superior, central, bay_area, southern, los_angeles),</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">region_name =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">'superior'</span>, <span class="st">'central'</span>, <span class="st">'bay_area'</span>, <span class="st">'southern'</span>,<span class="st">'los_angeles'</span>), </span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>               <span class="at">times =</span> <span class="fu">c</span>(<span class="fu">length</span>(superior), <span class="fu">length</span>(central), <span class="fu">length</span>(bay_area), <span class="fu">length</span>(southern),<span class="fu">length</span>(los_angeles))))</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>food <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(food,</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                   region_mapping,</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                   <span class="at">by =</span> <span class="st">"county_name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(food<span class="sc">$</span>cost_yr) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   3550    6647    7247    7347    7976   16872 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cost_fam_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(cost_yr <span class="sc">~</span> median_income <span class="sc">+</span> region_name <span class="sc">+</span> ave_fam_size <span class="sc">+</span> region_name <span class="sc">*</span> median_income, <span class="at">data =</span> food)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># should try removing the outliers in median_income and affordability food ratio</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># in "ave_fam_size" all races are combined, race variable not ideal in model</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>cost_fam_summary <span class="ot">&lt;-</span> <span class="fu">tidy</span>(cost_fam_lm) <span class="sc">%&gt;%</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Variable"</span>,<span class="st">"Estimate"</span>,<span class="st">"Std.Error"</span>, <span class="st">"Statistic"</span>,<span class="st">"p.value"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">bootstrap_options =</span> <span class="st">"bordered"</span>,</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">html_font =</span> <span class="st">"courier"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(food<span class="sc">$</span>median_income) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   2500   20219   30371   35986   44083  250000 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>food <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(median_income <span class="sc">&lt;</span> <span class="dv">110000</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Reclassify counties into 5 regions, not 15</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>superior <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Butte"</span>,<span class="st">"Colusa"</span>,<span class="st">"Del Norte"</span>,<span class="st">"Glenn"</span>,<span class="st">"Humboldt"</span>,<span class="st">"Lake"</span>,<span class="st">"Lassen"</span>,<span class="st">"Mendocino"</span>,<span class="st">"Modoc"</span>,<span class="st">"Nevada"</span>,<span class="st">"Plumas"</span>,<span class="st">"Shasta"</span>, <span class="st">"Sierra"</span>,<span class="st">"Siskiyou"</span>,<span class="st">"Tehama"</span>,<span class="st">"Trinity"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>central <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Alpine"</span>,<span class="st">"Amador"</span>,<span class="st">"El Dorado"</span>,<span class="st">"Fresno"</span>,<span class="st">"Inyo"</span>,<span class="st">"Kings"</span>,<span class="st">"Madera"</span>,<span class="st">"Mariposa"</span>,<span class="st">"Merced"</span>,<span class="st">"Mono"</span>,<span class="st">"Placer"</span>,<span class="st">"Sacramento"</span>,<span class="st">"San Joaquin"</span>,<span class="st">"Stanislaus"</span>,<span class="st">"Sutter"</span>,<span class="st">"Yuba"</span>,<span class="st">"Tulare"</span>,<span class="st">"Tuolumne"</span>,<span class="st">"Yolo"</span>, <span class="st">"Calaveras"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>bay_area <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Almeda"</span>,<span class="st">"Contra Costa"</span>,<span class="st">"Marin"</span>,<span class="st">"Monterey"</span>,<span class="st">"Napa"</span>,<span class="st">"San Benito"</span>,<span class="st">"San Fracisco"</span>,<span class="st">"San Mateo"</span>,<span class="st">"Santa Clara"</span>,<span class="st">"Santa Cruz"</span>,<span class="st">"Solano"</span>,<span class="st">"Sonoma"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>southern <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Imperial"</span>,<span class="st">"Kern"</span>,<span class="st">"Orange"</span>,<span class="st">"Riverside"</span>,<span class="st">"San Bernardino"</span>,<span class="st">"San Diego"</span>,<span class="st">"San Luis Obispo"</span>,<span class="st">"Santa Barbara"</span>,<span class="st">"Ventura"</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>los_angeles <span class="ot">&lt;-</span> <span class="st">"Los Angeles"</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>region_mapping <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">county_name =</span> <span class="fu">c</span>(superior, central, bay_area, southern, los_angeles),</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">region_name =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">'superior'</span>, <span class="st">'central'</span>, <span class="st">'bay_area'</span>, <span class="st">'southern'</span>,<span class="st">'los_angeles'</span>), </span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>               <span class="at">times =</span> <span class="fu">c</span>(<span class="fu">length</span>(superior), <span class="fu">length</span>(central), <span class="fu">length</span>(bay_area), <span class="fu">length</span>(southern),<span class="fu">length</span>(los_angeles))))</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>food <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(food,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>                   region_mapping,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>                   <span class="at">by =</span> <span class="st">"county_name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="apply-lm-model-where-independent-variable-is-food-cost-predictors-are-region-avg.-family-size-and-interaction-between-region-and-median-income" class="level4">
+<h4 class="anchored" data-anchor-id="apply-lm-model-where-independent-variable-is-food-cost-predictors-are-region-avg.-family-size-and-interaction-between-region-and-median-income">Apply lm model where independent variable is food cost, predictors are region, avg. family size and interaction between region and median income</h4>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>cost_fam_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(cost_yr <span class="sc">~</span> median_income <span class="sc">+</span> region_name <span class="sc">+</span> ave_fam_size <span class="sc">+</span> region_name <span class="sc">*</span> median_income, <span class="at">data =</span> food)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>cost_fam_summary <span class="ot">&lt;-</span> <span class="fu">tidy</span>(cost_fam_lm) <span class="sc">%&gt;%</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Variable"</span>,<span class="st">"Estimate"</span>,<span class="st">"Std.Error"</span>, <span class="st">"Statistic"</span>,<span class="st">"p.value"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">bootstrap_options =</span> <span class="st">"bordered"</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">html_font =</span> <span class="st">"courier"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <table class="table table-bordered" style="font-family: courier; width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -211,16 +243,16 @@ p.value
 (Intercept)
 </td>
 <td style="text-align:right;">
-171.8189172
+135.2335281
 </td>
 <td style="text-align:right;">
-36.5050609
+40.6646037
 </td>
 <td style="text-align:right;">
-4.706715
+3.3255833
 </td>
 <td style="text-align:right;">
-0.0000026
+0.0008924
 </td>
 </tr>
 <tr>
@@ -228,13 +260,13 @@ p.value
 median_income
 </td>
 <td style="text-align:right;">
-0.0015788
+0.0028174
 </td>
 <td style="text-align:right;">
-0.0002891
+0.0005326
 </td>
 <td style="text-align:right;">
-5.461213
+5.2898405
 </td>
 <td style="text-align:right;">
 0.0000001
@@ -245,13 +277,13 @@ median_income
 region_namecentral
 </td>
 <td style="text-align:right;">
--207.0307576
+-179.3231005
 </td>
 <td style="text-align:right;">
-26.5487792
+32.1164566
 </td>
 <td style="text-align:right;">
--7.798127
+-5.5835269
 </td>
 <td style="text-align:right;">
 0.0000000
@@ -262,13 +294,13 @@ region_namecentral
 region_namelos_angeles
 </td>
 <td style="text-align:right;">
-310.5366605
+346.5802045
 </td>
 <td style="text-align:right;">
-28.3554105
+37.9783635
 </td>
 <td style="text-align:right;">
-10.951584
+9.1257277
 </td>
 <td style="text-align:right;">
 0.0000000
@@ -279,16 +311,16 @@ region_namelos_angeles
 region_namesouthern
 </td>
 <td style="text-align:right;">
--26.4702680
+19.5980864
 </td>
 <td style="text-align:right;">
-25.1112179
+30.6535001
 </td>
 <td style="text-align:right;">
--1.054121
+0.6393425
 </td>
 <td style="text-align:right;">
-0.2919063
+0.5226464
 </td>
 </tr>
 <tr>
@@ -296,16 +328,16 @@ region_namesouthern
 region_namesuperior
 </td>
 <td style="text-align:right;">
--192.6484094
+-147.4205974
 </td>
 <td style="text-align:right;">
-35.7265906
+39.2189143
 </td>
 <td style="text-align:right;">
--5.392298
+-3.7589158
 </td>
 <td style="text-align:right;">
-0.0000001
+0.0001737
 </td>
 </tr>
 <tr>
@@ -313,13 +345,13 @@ region_namesuperior
 ave_fam_size
 </td>
 <td style="text-align:right;">
-2199.2256990
+2196.3209493
 </td>
 <td style="text-align:right;">
-10.2521116
+10.3573103
 </td>
 <td style="text-align:right;">
-214.514413
+212.0551468
 </td>
 <td style="text-align:right;">
 0.0000000
@@ -330,16 +362,16 @@ ave_fam_size
 median_income:region_namecentral
 </td>
 <td style="text-align:right;">
-0.0030919
+0.0025719
 </td>
 <td style="text-align:right;">
-0.0006379
+0.0008378
 </td>
 <td style="text-align:right;">
-4.846952
+3.0698536
 </td>
 <td style="text-align:right;">
-0.0000013
+0.0021598
 </td>
 </tr>
 <tr>
@@ -347,16 +379,16 @@ median_income:region_namecentral
 median_income:region_namelos_angeles
 </td>
 <td style="text-align:right;">
--0.0006143
+-0.0015394
 </td>
 <td style="text-align:right;">
-0.0004986
+0.0008478
 </td>
 <td style="text-align:right;">
--1.231911
+-1.8157045
 </td>
 <td style="text-align:right;">
-0.2180719
+0.0695102
 </td>
 </tr>
 <tr>
@@ -364,16 +396,16 @@ median_income:region_namelos_angeles
 median_income:region_namesouthern
 </td>
 <td style="text-align:right;">
-0.0019820
+0.0007464
 </td>
 <td style="text-align:right;">
-0.0005091
+0.0007104
 </td>
 <td style="text-align:right;">
-3.893394
+1.0506699
 </td>
 <td style="text-align:right;">
-0.0001009
+0.2934904
 </td>
 </tr>
 <tr>
@@ -381,34 +413,54 @@ median_income:region_namesouthern
 median_income:region_namesuperior
 </td>
 <td style="text-align:right;">
-0.0045010
+0.0032610
 </td>
 <td style="text-align:right;">
-0.0011239
+0.0012063
 </td>
 <td style="text-align:right;">
-4.004682
+2.7033858
 </td>
 <td style="text-align:right;">
-0.0000635
+0.0069004
 </td>
 </tr>
 </tbody>
 </table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plot1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(food, <span class="fu">aes</span>(region_name, <span class="at">fill =</span> cost_yr)) <span class="sc">+</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> <span class="st">"firebrick3"</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"skyblue2"</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape =</span> <span class="dv">19</span>) <span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>   <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>)) <span class="sc">+</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Food cost"</span>) <span class="sc">+</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Region"</span>) <span class="sc">+</span> </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Food cost vs region"</span>) </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>plot1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="finalproject_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="run-a-vif-to-detect-multicollinearity-if-present" class="level4">
 <h4 class="anchored" data-anchor-id="run-a-vif-to-detect-multicollinearity-if-present">Run a VIF to detect multicollinearity, if present</h4>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>vif_results <span class="ot">&lt;-</span> <span class="fu">vif</span>(cost_fam_lm) </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>vif_results <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>vif_results <span class="ot">&lt;-</span> <span class="fu">vif</span>(cost_fam_lm) </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>vif_results <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <pre><code>                            GVIF Df GVIF^(1/(2*Df))</code></pre>
-<p>median_income 2.513025 1 1.585252 region_name 91.761181 4 1.759270 ave_fam_size 1.123043 1 1.059737 median_income:region_name 113.392214 4 1.806437</p>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>vif_table <span class="ot">&lt;-</span> vif_results <span class="sc">%&gt;%</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="st">"html"</span>, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Variable"</span>, <span class="st">"GVIF"</span>, <span class="st">"Degrees of freedom"</span>, <span class="st">"Adjusted GVIF"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">bootstrap_options =</span> <span class="st">"bordered"</span>,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">html_font =</span> <span class="st">"courier"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>median_income 4.169156 1 2.041851 region_name 279.949406 4 2.022483 ave_fam_size 1.129055 1 1.062570 median_income:region_name 390.275901 4 2.108247</p>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>vif_table <span class="ot">&lt;-</span> vif_results <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="st">"html"</span>, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Variable"</span>, <span class="st">"GVIF"</span>, <span class="st">"Degrees of freedom"</span>, <span class="st">"Adjusted GVIF"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">bootstrap_options =</span> <span class="st">"bordered"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">html_font =</span> <span class="st">"courier"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <table class="table table-bordered" style="font-family: courier; width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -432,13 +484,13 @@ Adjusted GVIF
 median_income
 </td>
 <td style="text-align:right;">
-2.513025
+4.169156
 </td>
 <td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
-1.585252
+2.041851
 </td>
 </tr>
 <tr>
@@ -446,13 +498,13 @@ median_income
 region_name
 </td>
 <td style="text-align:right;">
-91.761181
+279.949406
 </td>
 <td style="text-align:right;">
 4
 </td>
 <td style="text-align:right;">
-1.759270
+2.022483
 </td>
 </tr>
 <tr>
@@ -460,13 +512,13 @@ region_name
 ave_fam_size
 </td>
 <td style="text-align:right;">
-1.123043
+1.129055
 </td>
 <td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
-1.059737
+1.062570
 </td>
 </tr>
 <tr>
@@ -474,37 +526,273 @@ ave_fam_size
 median_income:region_name
 </td>
 <td style="text-align:right;">
-113.392214
+390.275901
 </td>
 <td style="text-align:right;">
 4
 </td>
 <td style="text-align:right;">
-1.806437
+2.108247
 </td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="testing-the-null-hypothesis" class="level4">
+<h4 class="anchored" data-anchor-id="testing-the-null-hypothesis">Testing the null hypothesis</h4>
+<ul>
+<li><p>Null Hypothesis (H0): Region does not have a significant effect on food cost.</p></li>
+<li><p>Alternative Hypothesis (H1): Region does have a significant effect on food cost.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>cost_summary <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(region_name) <span class="sc">%&gt;%</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">median_cost =</span> <span class="fu">median</span>(cost_yr, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the point estimate of the difference in median income between two regions</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>point_estimate_cost <span class="ot">&lt;-</span> cost_summary<span class="sc">$</span>median_cost[<span class="dv">2</span>] <span class="sc">-</span> cost_summary<span class="sc">$</span>median_cost[<span class="dv">1</span>]</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>point_estimate_cost</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 546.0284</code></pre>
+</div>
+</div>
+</section>
+<section id="randomization-test" class="level4">
+<h4 class="anchored" data-anchor-id="randomization-test">Randomization test</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the seed for reproducibility</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the null distribution with 1000 permutations</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>null_dist <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Shuffle the cost values across all regions</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  shuffled_data <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cost_yr =</span> <span class="fu">sample</span>(cost_yr, <span class="fu">n</span>()))</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  shuffled_summary <span class="ot">&lt;-</span> shuffled_data <span class="sc">%&gt;%</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(region_name) <span class="sc">%&gt;%</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">median_cost =</span> <span class="fu">median</span>(cost_yr, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  point_estimate <span class="ot">&lt;-</span> shuffled_summary<span class="sc">$</span>median_cost[<span class="dv">2</span>] <span class="sc">-</span> shuffled_summary<span class="sc">$</span>median_cost[<span class="dv">1</span>]</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  point_estimate</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>observed_point_estimate <span class="ot">&lt;-</span> point_estimate_cost</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the null distribution</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">tibble</span>(null_dist), <span class="fu">aes</span>(null_dist)) <span class="sc">+</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">20</span>, <span class="at">color =</span> <span class="st">"cornflowerblue"</span>, <span class="at">fill =</span> <span class="st">"firebrick3"</span>) <span class="sc">+</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> observed_point_estimate, <span class="at">color =</span> <span class="st">"firebrick3"</span>) <span class="sc">+</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Null Distribution of Median Cost Differences"</span>) <span class="sc">+</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Difference in Median Cost"</span>) <span class="sc">+</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Frequency"</span>) <span class="sc">+</span></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>   <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="finalproject_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="find-p-value" class="level4">
+<h4 class="anchored" data-anchor-id="find-p-value">Find p-value</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the p-value</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>p_value <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(null_dist) <span class="sc">&gt;=</span> <span class="fu">abs</span>(observed_point_estimate))</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">10</span>)  <span class="co"># Increase precision for the output</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p_value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the seed for reproducibility</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># List of region pairs to test</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>region_pairs <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"superior"</span>, <span class="st">"central"</span>),</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"central"</span>, <span class="st">"bay_area"</span>),</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"bay_area"</span>, <span class="st">"southern"</span>),</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"southern"</span>, <span class="st">"los_angeles"</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a data frame to store results</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">Region_Pair =</span> <span class="fu">character</span>(),</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">Observed_Difference =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">P_Value =</span> <span class="fu">numeric</span>()</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through each region pair and run the test</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (pair <span class="cf">in</span> region_pairs) {</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  region1 <span class="ot">&lt;-</span> pair[<span class="dv">1</span>]</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  region2 <span class="ot">&lt;-</span> pair[<span class="dv">2</span>]</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate the observed point estimate</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>  cost_summary <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(region_name <span class="sc">%in%</span> <span class="fu">c</span>(region1, region2)) <span class="sc">%&gt;%</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(region_name) <span class="sc">%&gt;%</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">median_cost =</span> <span class="fu">median</span>(cost_yr, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">nrow</span>(cost_summary) <span class="sc">==</span> <span class="dv">2</span>) {  <span class="co"># Ensure both regions are present in the data</span></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>    observed_point_estimate <span class="ot">&lt;-</span> cost_summary<span class="sc">$</span>median_cost[<span class="dv">2</span>] <span class="sc">-</span> cost_summary<span class="sc">$</span>median_cost[<span class="dv">1</span>]</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create the null distribution with 1000 permutations</span></span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    null_dist <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>      shuffled_data <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">cost_yr =</span> <span class="fu">sample</span>(cost_yr, <span class="fu">n</span>()))</span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>      shuffled_summary <span class="ot">&lt;-</span> shuffled_data <span class="sc">%&gt;%</span></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(region_name <span class="sc">%in%</span> <span class="fu">c</span>(region1, region2)) <span class="sc">%&gt;%</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>        <span class="fu">group_by</span>(region_name) <span class="sc">%&gt;%</span></span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summarize</span>(<span class="at">median_cost =</span> <span class="fu">median</span>(cost_yr, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">nrow</span>(shuffled_summary) <span class="sc">==</span> <span class="dv">2</span>) {</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a>        point_estimate <span class="ot">&lt;-</span> shuffled_summary<span class="sc">$</span>median_cost[<span class="dv">2</span>] <span class="sc">-</span> shuffled_summary<span class="sc">$</span>median_cost[<span class="dv">1</span>]</span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a>        point_estimate</span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>        <span class="cn">NA</span>  <span class="co"># In case a region is missing after shuffle, return NA</span></span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate the p-value</span></span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a>    p_value <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(null_dist) <span class="sc">&gt;=</span> <span class="fu">abs</span>(observed_point_estimate))</span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add results to the data frame</span></span>
+<span id="cb22-55"><a href="#cb22-55" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
+<span id="cb22-56"><a href="#cb22-56" aria-hidden="true" tabindex="-1"></a>      <span class="fu">add_row</span>(</span>
+<span id="cb22-57"><a href="#cb22-57" aria-hidden="true" tabindex="-1"></a>        <span class="at">Region_Pair =</span> <span class="fu">paste</span>(region1, <span class="st">"vs"</span>, region2),</span>
+<span id="cb22-58"><a href="#cb22-58" aria-hidden="true" tabindex="-1"></a>        <span class="at">Observed_Difference =</span> observed_point_estimate,</span>
+<span id="cb22-59"><a href="#cb22-59" aria-hidden="true" tabindex="-1"></a>        <span class="at">P_Value =</span> p_value</span>
+<span id="cb22-60"><a href="#cb22-60" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb22-61"><a href="#cb22-61" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb22-62"><a href="#cb22-62" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
+<span id="cb22-63"><a href="#cb22-63" aria-hidden="true" tabindex="-1"></a>      <span class="fu">add_row</span>(</span>
+<span id="cb22-64"><a href="#cb22-64" aria-hidden="true" tabindex="-1"></a>        <span class="at">Region_Pair =</span> <span class="fu">paste</span>(region1, <span class="st">"vs"</span>, region2),</span>
+<span id="cb22-65"><a href="#cb22-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">Observed_Difference =</span> <span class="cn">NA</span>,</span>
+<span id="cb22-66"><a href="#cb22-66" aria-hidden="true" tabindex="-1"></a>        <span class="at">P_Value =</span> <span class="cn">NA</span></span>
+<span id="cb22-67"><a href="#cb22-67" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb22-68"><a href="#cb22-68" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb22-69"><a href="#cb22-69" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the seed for reproducibility</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># List of region pairs to test</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>region_pairs <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"superior"</span>, <span class="st">"central"</span>),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"central"</span>, <span class="st">"bay_area"</span>),</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"bay_area"</span>, <span class="st">"southern"</span>),</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"southern"</span>, <span class="st">"los_angeles"</span>)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a data frame to store results</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">Region_Pair =</span> <span class="fu">character</span>(),</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">Observed_Difference =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">P_Value =</span> <span class="fu">numeric</span>()</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform the cost data to log scale</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>food <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">log_cost =</span> <span class="fu">log</span>(cost_yr))</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through each region pair and run the test</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (pair <span class="cf">in</span> region_pairs) {</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>  region1 <span class="ot">&lt;-</span> pair[<span class="dv">1</span>]</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>  region2 <span class="ot">&lt;-</span> pair[<span class="dv">2</span>]</span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate the observed point estimate for the log-transformed median cost</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>  cost_summary <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(region_name <span class="sc">%in%</span> <span class="fu">c</span>(region1, region2)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(region_name) <span class="sc">%&gt;%</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">median_log_cost =</span> <span class="fu">median</span>(log_cost, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">nrow</span>(cost_summary) <span class="sc">==</span> <span class="dv">2</span>) {  <span class="co"># Ensure both regions are present in the data</span></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>    observed_point_estimate <span class="ot">&lt;-</span> cost_summary<span class="sc">$</span>median_log_cost[<span class="dv">2</span>] <span class="sc">-</span> cost_summary<span class="sc">$</span>median_log_cost[<span class="dv">1</span>]</span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create the null distribution with 1000 permutations</span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>    null_dist <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>      shuffled_data <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">log_cost =</span> <span class="fu">sample</span>(log_cost, <span class="fu">n</span>()))</span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>      shuffled_summary <span class="ot">&lt;-</span> shuffled_data <span class="sc">%&gt;%</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(region_name <span class="sc">%in%</span> <span class="fu">c</span>(region1, region2)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>        <span class="fu">group_by</span>(region_name) <span class="sc">%&gt;%</span></span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summarize</span>(<span class="at">median_log_cost =</span> <span class="fu">median</span>(log_cost, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">nrow</span>(shuffled_summary) <span class="sc">==</span> <span class="dv">2</span>) {</span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a>        point_estimate <span class="ot">&lt;-</span> shuffled_summary<span class="sc">$</span>median_log_cost[<span class="dv">2</span>] <span class="sc">-</span> shuffled_summary<span class="sc">$</span>median_log_cost[<span class="dv">1</span>]</span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>        point_estimate</span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a>        <span class="cn">NA</span>  <span class="co"># Return NA if a region is missing after shuffle</span></span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove any NA values from the null distribution (e.g., when one region is missing)</span></span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a>    null_dist <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(null_dist)</span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate the p-value</span></span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a>    p_value <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(null_dist) <span class="sc">&gt;=</span> <span class="fu">abs</span>(observed_point_estimate))</span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add results to the data frame</span></span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a>      <span class="fu">add_row</span>(</span>
+<span id="cb23-64"><a href="#cb23-64" aria-hidden="true" tabindex="-1"></a>        <span class="at">Region_Pair =</span> <span class="fu">paste</span>(region1, <span class="st">"vs"</span>, region2),</span>
+<span id="cb23-65"><a href="#cb23-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">Observed_Difference =</span> observed_point_estimate,</span>
+<span id="cb23-66"><a href="#cb23-66" aria-hidden="true" tabindex="-1"></a>        <span class="at">P_Value =</span> p_value</span>
+<span id="cb23-67"><a href="#cb23-67" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb23-68"><a href="#cb23-68" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb23-69"><a href="#cb23-69" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
+<span id="cb23-70"><a href="#cb23-70" aria-hidden="true" tabindex="-1"></a>      <span class="fu">add_row</span>(</span>
+<span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a>        <span class="at">Region_Pair =</span> <span class="fu">paste</span>(region1, <span class="st">"vs"</span>, region2),</span>
+<span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a>        <span class="at">Observed_Difference =</span> <span class="cn">NA</span>,</span>
+<span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a>        <span class="at">P_Value =</span> <span class="cn">NA</span></span>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb23-75"><a href="#cb23-75" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-76"><a href="#cb23-76" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-77"><a href="#cb23-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-78"><a href="#cb23-78" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the results</span></span>
+<span id="cb23-79"><a href="#cb23-79" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+  Region_Pair             Observed_Difference P_Value
+  &lt;chr&gt;                                 &lt;dbl&gt;   &lt;dbl&gt;
+1 superior vs central                 -0.117        0
+2 central vs bay_area                  0.0764       0
+3 bay_area vs southern                 0.0792       0
+4 southern vs los_angeles             -0.0473       0</code></pre>
+</div>
+</div>
 <p>High level of multicollinearity between region and food cost, and between region and median_income but when adjusted for degrees of freedom, not severe enough to drop the predictors with the high VIF</p>
 </section>
-<section id="response-variable-affordability-ratio" class="level1">
-<h1>response variable = affordability ratio</h1>
+<section id="classify-counties-by-region-to-make-5-level-categorical-variable" class="level1">
+<h1>classify counties by region to make 5 level categorical variable</h1>
 </section>
-<section id="independent-variables-predictors" class="level1">
-<h1>independent variables / predictors</h1>
-</section>
-<section id="county---but-must-drop-nas-136---categorical" class="level1">
-<h1>county - but must drop NAs (136) &lt;- categorical</h1>
-</section>
-<section id="median_income---numerical" class="level1">
-<h1>median_income &lt;- numerical</h1>
-</section>
-<section id="average-family-size---numerical" class="level1">
-<h1>average family size &lt;- numerical</h1>
+<section id="if-i-had-used-the-region_name-col-from-original-data-the-categorical-variable-would-have-15-levels-as-opposed-to-5-if-i-follow-the-mpo-region-designations-metropolitan-planning-organization" class="level1">
+<h1>if I had used the region_name col from original data the categorical variable would have 15 levels, as opposed to 5 if I follow the MPO region designations (Metropolitan Planning Organization)</h1>
 <section id="hypothesis" class="level4">
 <h4 class="anchored" data-anchor-id="hypothesis">Hypothesis:</h4>
 <p>median income, family size female-headed households</p>
 </section>
+</section>
+<section id="should-try-removing-the-outliers-in-median_income-and-affordability-food-ratio" class="level1">
+<h1>should try removing the outliers in median_income and affordability food ratio</h1>
+</section>
+<section id="in-ave_fam_size-all-races-are-combined-race-variable-not-ideal-in-model" class="level1">
+<h1>in “ave_fam_size” all races are combined, race variable not ideal in model</h1>
+<p>Null Hypothesis (H0): Median income does not differ significantly across regions. Alternative Hypothesis (H1): Median income differs significantly across regions.</p>
 </section>
 
 </main>
