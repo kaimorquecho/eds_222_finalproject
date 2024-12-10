@@ -1,13 +1,16 @@
 ---
 title: "final_project"
-format: html
+date: last-modified
+execute: 
+  eval: true
+  warning: false
+  message: false
+format:
+  html:
+    toc: true
 editor_options: 
   chunk_output_type: console
 ---
-
-```{r}
-install.packages("broom")
-```
 
 ```{r}
 library(tidyverse)
@@ -23,7 +26,6 @@ food <- read_csv(here("data","food_affordability_2006_2010.csv"))
 counties <- read.csv(here("data","california_counties.csv"))
 ```
 
-
 #### Data Cleaning 
 
 ```{r}
@@ -32,6 +34,37 @@ food <- food %>%
   select(-region_name) # removed MPO region names
 ```
 
+```{r}
+# Create a histogram for median_income
+income_hist <- ggplot(food, aes(x = median_income)) +
+  geom_histogram(binwidth = 5000, fill = "firebrick2", color = "white") +
+  labs(title = "Histogram of median income", 
+       x = "Median income", 
+       y = "Frequency") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"),
+        panel.background = element_rect(colour = "skyblue")) 
+
+income_hist
+```
+
+```{r}
+summary(food$cost_yr) %>%
+  kable() %>%
+  kable_styling(full_width = FALSE,
+                bootstrap_options = "bordered",
+                html_font = "courier") %>%
+
+summary(food$median_income) %>%
+  kable() %>%
+  kable_styling(full_width = FALSE,
+                bootstrap_options = "bordered",
+                html_font = "courier") %>%
+
+food <- food %>% 
+  filter(median_income < 125000) 
+
+```
 
 ```{r}
 # classify counties by region to make 5 level categorical variable
@@ -57,33 +90,21 @@ food <- inner_join(food,
                    by = "county_name")
 ```
 
-```{r}
+```{r results='asis'}
 cost_fam_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size + region_name * median_income, data = food)
 # should try removing the outliers in median_income and affordability food ratio
 # in "ave_fam_size" all races are combined, race variable not ideal in model
 
 cost_fam_summary <- tidy(cost_fam_lm) %>%
-  kable() %>%
+  kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
   kable_styling(full_width = FALSE,
                 bootstrap_options = "bordered",
                 html_font = "courier") %>%
   print()
 ```
 
-```{r}
-# Create a histogram for median_income
-ggplot(food, aes(x = median_income)) +
-  geom_histogram(binwidth = 5000, fill = "firebrick2", color = "white") +
-  labs(title = "Histogram of median income", 
-       x = "Median income", 
-       y = "Frequency") +
-  theme_bw() +
-  theme(text = element_text(family = "courier"),
-        panel.background = element_rect(colour = "white"))
-```
-
 #### Run a VIF to detect multicollinearity, if present
-```{r}
+```{r results='asis'}
 vif_results <- vif(cost_fam_lm) 
 vif_results %>%
   as.data.frame()
@@ -95,6 +116,9 @@ vif_table <- vif_results %>%
                 html_font = "courier") %>%
   print()
 ```
+
+High level of multicollinearity between region and food cost, and between region and median_income but when adjusted for degrees of freedom, not severe enough to drop the predictors with the high VIF
+
 
 # response variable = affordability ratio
 # independent variables / predictors
