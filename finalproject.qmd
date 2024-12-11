@@ -1,5 +1,5 @@
 ---
-title: "Regional analysis of food costs in female-headed households"
+title: "Analysis of food costs in female-headed households"
 date: last-modified
 execute: 
   eval: true
@@ -34,12 +34,42 @@ Drop NAs for median income and visualize min and max to see if outliers must be 
 food <- food %>%
  filter(!is.na(median_income)) %>% # removed all median_income NAs as they are crucial for lm 
   select(-region_name) # removed MPO region names
+
+summary(food$cost_yr) 
+summary(food$median_income) 
+
+food <- food %>% 
+  mutate(log_cost = log(cost_yr)) %>%
+  mutate(log_income = log(median_income))
 ```
 
 ```{r}
 # Create a histogram for median_income
+income_hist <- ggplot(food, aes(x = log_income)) +
+  geom_histogram(binwidth = 10, fill = "firebrick2", color = "white") +
+  labs(title = "Histogram of median income", 
+       x = "Median income (log)", 
+       y = "Frequency") +
+  theme_bw() + 
+  theme(text = element_text(family = "courier"),
+        panel.background = element_rect(colour = "skyblue")) 
+
+income_hist
+
+cost_hist <- ggplot(food, aes(x = log_cost)) +
+  geom_histogram(binwidth = 10, fill = "firebrick2", color = "white") +
+  labs(title = "Histogram of food cost", 
+       x = "Food cost (log)", 
+       y = "Frequency") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"),
+        panel.background = element_rect(colour = "skyblue")) 
+
+cost_hist
+
+# Create a histogram for median_income
 income_hist <- ggplot(food, aes(x = median_income)) +
-  geom_histogram(binwidth = 5000, fill = "firebrick2", color = "white") +
+  geom_histogram(binwidth = 10000, fill = "firebrick2", color = "white") +
   labs(title = "Histogram of median income", 
        x = "Median income", 
        y = "Frequency") +
@@ -50,7 +80,7 @@ income_hist <- ggplot(food, aes(x = median_income)) +
 income_hist
 
 cost_hist <- ggplot(food, aes(x = cost_yr)) +
-  geom_histogram(binwidth = 5000, fill = "firebrick2", color = "white") +
+  geom_histogram(binwidth = 1000, fill = "firebrick2", color = "white") +
   labs(title = "Histogram of food cost", 
        x = "Food cost", 
        y = "Frequency") +
@@ -59,15 +89,6 @@ cost_hist <- ggplot(food, aes(x = cost_yr)) +
         panel.background = element_rect(colour = "skyblue")) 
 
 cost_hist
-```
-
-
-```{r}
-summary(food$cost_yr) 
-summary(food$median_income) 
-
-food <- food %>% 
-  filter(median_income < 110000) 
 ```
 
 Reclassify counties into 5 regions, not 15
@@ -96,9 +117,22 @@ food <- inner_join(food,
 #### Apply lm model where independent variable is food cost, predictors are region, avg. family size and interaction between region and median income
 
 ```{r results='asis'}
-cost_fam_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size + region_name * median_income, data = food)
+cost_fam_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size , data = food)
 
 cost_fam_summary <- tidy(cost_fam_lm) %>%
+  kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
+  kable_styling(full_width = FALSE,
+                bootstrap_options = "bordered",
+                html_font = "courier") %>%
+  print()
+```
+
+#### lm model using log_cost
+
+```{r results= 'asis'}
+log_cost_lm <- lm(log_cost ~ log_income + region_name + ave_fam_size , data = food)
+
+log_cost_summary <- tidy(log_cost_lm) %>%
   kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
   kable_styling(full_width = FALSE,
                 bootstrap_options = "bordered",
@@ -151,6 +185,17 @@ point_estimate_cost <- cost_summary$median_cost[2] - cost_summary$median_cost[1]
 
 point_estimate_cost
 
+```
+
+```{r}
+cost_summary <- food %>%
+  group_by(region_name) %>%
+  summarize(median_cost = median(cost_yr, na.rm = TRUE))
+
+# Calculate the point estimate of the difference in median income between two regions
+point_estimate_cost <- cost_summary$median_cost[2] - cost_summary$median_cost[1]
+
+point_estimate_cost
 ```
 
 #### Randomization test
@@ -359,19 +404,19 @@ print(results)
 ```
 
 
-High level of multicollinearity between region and food cost, and between region and median_income but when adjusted for degrees of freedom, not severe enough to drop the predictors with the high VIF
+<!-- High level of multicollinearity between region and food cost, and between region and median_income but when adjusted for degrees of freedom, not severe enough to drop the predictors with the high VIF -->
 
-# classify counties by region to make 5 level categorical variable
+<!-- # classify counties by region to make 5 level categorical variable -->
 
-# if I had used the region_name col from original data the categorical variable would have 15 levels, as opposed to 5 if I follow the MPO region designations (Metropolitan Planning Organization)
+<!-- # if I had used the region_name col from original data the categorical variable would have 15 levels, as opposed to 5 if I follow the MPO region designations (Metropolitan Planning Organization) -->
 
 
-#### Hypothesis:
+<!-- #### Hypothesis: -->
 
-median income, family size female-headed households
+<!-- median income, family size female-headed households -->
 
-# should try removing the outliers in median_income and affordability food ratio
+<!-- # should try removing the outliers in median_income and affordability food ratio -->
 
-# in "ave_fam_size" all races are combined, race variable not ideal in model
+<!-- # in "ave_fam_size" all races are combined, race variable not ideal in model -->
 
-Null Hypothesis (H0): Median income does not differ significantly across regions. Alternative Hypothesis (H1): Median income differs significantly across regions.
+
