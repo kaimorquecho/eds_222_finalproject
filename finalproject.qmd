@@ -43,55 +43,7 @@ food <- food %>%
   mutate(log_income = log(median_income))
 ```
 
-```{r}
-# Create a histogram for median_income
-income_hist <- ggplot(food, aes(x = log_income)) +
-  geom_histogram(binwidth = 10, fill = "firebrick2", color = "white") +
-  labs(title = "Histogram of median income", 
-       x = "Median income (log)", 
-       y = "Frequency") +
-  theme_bw() + 
-  theme(text = element_text(family = "courier"),
-        panel.background = element_rect(colour = "skyblue")) 
-
-income_hist
-
-cost_hist <- ggplot(food, aes(x = log_cost)) +
-  geom_histogram(binwidth = 10, fill = "firebrick2", color = "white") +
-  labs(title = "Histogram of food cost", 
-       x = "Food cost (log)", 
-       y = "Frequency") +
-  theme_bw() +
-  theme(text = element_text(family = "courier"),
-        panel.background = element_rect(colour = "skyblue")) 
-
-cost_hist
-
-# Create a histogram for median_income
-income_hist <- ggplot(food, aes(x = median_income)) +
-  geom_histogram(binwidth = 10000, fill = "firebrick2", color = "white") +
-  labs(title = "Histogram of median income", 
-       x = "Median income", 
-       y = "Frequency") +
-  theme_bw() +
-  theme(text = element_text(family = "courier"),
-        panel.background = element_rect(colour = "skyblue")) 
-
-income_hist
-
-cost_hist <- ggplot(food, aes(x = cost_yr)) +
-  geom_histogram(binwidth = 1000, fill = "firebrick2", color = "white") +
-  labs(title = "Histogram of food cost", 
-       x = "Food cost", 
-       y = "Frequency") +
-  theme_bw() +
-  theme(text = element_text(family = "courier"),
-        panel.background = element_rect(colour = "skyblue")) 
-
-cost_hist
-```
-
-Reclassify counties into 5 regions, not 15
+#### Reclassify counties into 5 regions, not 15
 
 ```{r}
 superior <- c("Butte","Colusa","Del Norte","Glenn","Humboldt","Lake","Lassen","Mendocino","Modoc","Nevada","Plumas","Shasta", "Sierra","Siskiyou","Tehama","Trinity")
@@ -114,59 +66,78 @@ food <- inner_join(food,
                    by = "county_name")
 ```
 
+#### Histograms to visualize data
+
+```{r}
+# Create histogram for food cost
+cost_hist <- ggplot(food, aes(x = cost_yr)) +
+  geom_histogram(binwidth = 100, fill = "lightblue") +
+  labs(title = "Histogram of food cost",
+       x = "Food cost",
+       y = "Frequency") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"),
+        panel.background = element_rect(fill = "white")) +
+  geom_vline(aes(xintercept = mean(cost_yr)),
+            color = "indianred2",
+            lwd = 1)
+
+cost_hist
+```
+
 #### Apply lm model where independent variable is food cost, predictors are region, avg. family size and interaction between region and median income
 
 ```{r results='asis'}
-cost_fam_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size , data = food)
-
-cost_fam_summary <- tidy(cost_fam_lm) %>%
-  kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
-  kable_styling(full_width = FALSE,
-                bootstrap_options = "bordered",
-                html_font = "courier") %>%
-  print()
+# cost_fam_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size , data = food)
+# 
+# cost_fam_summary <- tidy(cost_fam_lm) %>%
+#   kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
+#   kable_styling(full_width = FALSE,
+#                 bootstrap_options = "bordered",
+#                 html_font = "courier") %>%
+#   print()
 ```
 
 #### lm model using log_cost
 
 ```{r results= 'asis'}
-log_cost_lm <- lm(log_cost ~ log_income + region_name + ave_fam_size , data = food)
-
-log_cost_summary <- tidy(log_cost_lm) %>%
-  kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
-  kable_styling(full_width = FALSE,
-                bootstrap_options = "bordered",
-                html_font = "courier") %>%
-  print()
+# log_cost_lm <- lm(log_cost ~ log_income + region_name + ave_fam_size , data = food)
+# 
+# log_cost_summary <- tidy(log_cost_lm) %>%
+#   kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
+#   kable_styling(full_width = FALSE,
+#                 bootstrap_options = "bordered",
+#                 html_font = "courier") %>%
+#   print()
 ```
 
 ```{r}
-plot1 <- ggplot(food, aes(region_name, fill = cost_yr)) +
-  geom_bar(fill = "firebrick3",
-             color = "skyblue2",
-             shape = 19) +
-  theme_bw() +
-   theme(text = element_text(family = "courier")) +
-  ylab("Food cost") +
-  xlab("Region") + 
-  ggtitle("Food cost vs region") 
- 
-plot1
+# plot1 <- ggplot(food, aes(region_name, fill = cost_yr)) +
+#   geom_bar(fill = "firebrick3",
+#              color = "skyblue2",
+#              shape = 19) +
+#   theme_bw() +
+#    theme(text = element_text(family = "courier")) +
+#   ylab("Food cost") +
+#   xlab("Region") + 
+#   ggtitle("Food cost vs region") 
+#  
+# plot1
 ```
 
 #### Run a VIF to detect multicollinearity, if present
 
 ```{r results='asis'}
-vif_results <- vif(cost_fam_lm) 
-vif_results %>%
-  as.data.frame()
-
-vif_table <- vif_results %>%
-  kable("html", col.names = c("Variable", "GVIF", "Degrees of freedom", "Adjusted GVIF")) %>%
-  kable_styling(full_width = FALSE,
-                bootstrap_options = "bordered",
-                html_font = "courier") %>%
-  print()
+# vif_results <- vif(cost_fam_lm) 
+# vif_results %>%
+#   as.data.frame()
+# 
+# vif_table <- vif_results %>%
+#   kable("html", col.names = c("Variable", "GVIF", "Degrees of freedom", "Adjusted GVIF")) %>%
+#   kable_styling(full_width = FALSE,
+#                 bootstrap_options = "bordered",
+#                 html_font = "courier") %>%
+#   print()
 ```
 
 #### Testing the null hypothesis
@@ -183,7 +154,7 @@ cost_summary <- food %>%
 # Calculate the point estimate of the difference in median income between two regions
 point_estimate_cost <- cost_summary$median_cost[2] - cost_summary$median_cost[1]
 
-point_estimate_cost
+point_estimate_cost # the diff between 2 regions
 
 ```
 
