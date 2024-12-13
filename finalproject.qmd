@@ -33,13 +33,13 @@ Drop NAs for median income and visualize min and max to see if outliers must be 
 ```{r}
 food <- food %>%
  filter(!is.na(median_income)) %>% # removed all median_income NAs as they are crucial for lm 
-  select(-region_name) # removed MPO region names
+  select(-region_name) %>%  # removed MPO region names
+  filter(race_eth_name == c("Total","Latino","White","AfricanAm"))
 
 summary(food$cost_yr) 
 summary(food$median_income) 
 
-food <- food %>% 
-  mutate(log_cost = log(cost_yr)) %>%
+food <- food %>%
   mutate(log_income = log(median_income))
 ```
 
@@ -88,59 +88,24 @@ cost_hist <- ggplot(food, aes(x = cost_yr)) +
 cost_hist
 ```
 
-#### Apply lm model where independent variable is food cost, predictors are region, avg. family size and interaction between region and median income
-
-```{r results='asis'}
-# cost_fam_lm <- lm(cost_yr ~ median_income + region_name + ave_fam_size , data = food)
-# 
-# cost_fam_summary <- tidy(cost_fam_lm) %>%
-#   kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
-#   kable_styling(full_width = FALSE,
-#                 bootstrap_options = "bordered",
-#                 html_font = "courier") %>%
-#   print()
-```
-
-#### lm model using log_cost
-
-```{r results= 'asis'}
-# log_cost_lm <- lm(log_cost ~ log_income + region_name + ave_fam_size , data = food)
-# 
-# log_cost_summary <- tidy(log_cost_lm) %>%
-#   kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
-#   kable_styling(full_width = FALSE,
-#                 bootstrap_options = "bordered",
-#                 html_font = "courier") %>%
-#   print()
-```
-
 ```{r}
-# plot1 <- ggplot(food, aes(region_name, fill = cost_yr)) +
-#   geom_bar(fill = "firebrick3",
-#              color = "skyblue2",
-#              shape = 19) +
-#   theme_bw() +
-#    theme(text = element_text(family = "courier")) +
-#   ylab("Food cost") +
-#   xlab("Region") + 
-#   ggtitle("Food cost vs region") 
-#  
-# plot1
-```
+# Create histogram for income 
+income_hist <- ggplot(food, aes(x = median_income)) +
+  geom_histogram(binwidth = 1000, fill = "lightblue") +
+  labs(title = "Histogram of median income",
+       x = "Median income",
+       y = "Frequency") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"),
+        panel.background = element_rect(fill = "white")) +
+  geom_vline(aes(xintercept = mean(median_income)),
+            color = "black",
+            lwd = 0.5) +
+  geom_vline(aes(xintercept = median(median_income)),
+            color = "indianred2",
+            lwd = 0.5)
 
-#### Run a VIF to detect multicollinearity, if present
-
-```{r results='asis'}
-# vif_results <- vif(cost_fam_lm) 
-# vif_results %>%
-#   as.data.frame()
-# 
-# vif_table <- vif_results %>%
-#   kable("html", col.names = c("Variable", "GVIF", "Degrees of freedom", "Adjusted GVIF")) %>%
-#   kable_styling(full_width = FALSE,
-#                 bootstrap_options = "bordered",
-#                 html_font = "courier") %>%
-#   print()
+income_hist
 ```
 
 #### Testing the null hypothesis
@@ -194,6 +159,8 @@ region_1_2 <- ggplot(tibble(null_dist_1), aes(null_dist_1)) +
   theme_bw() +
    theme(text = element_text(family = "courier"))
 
+region_1_2
+
 ```
 
 ###### Regions 3 & 4 
@@ -229,6 +196,7 @@ region_3_4 <- ggplot(tibble(null_dist_2), aes(null_dist_2)) +
   theme_bw() +
    theme(text = element_text(family = "courier"))
 
+region_3_4
 ```
 
 ###### Regions 4 & 5 
@@ -264,6 +232,7 @@ region_4_5 <- ggplot(tibble(null_dist_3), aes(null_dist_3)) +
   theme_bw() +
    theme(text = element_text(family = "courier"))
 
+region_4_5
 ```
 
 #### Find p-value
@@ -283,6 +252,55 @@ p_value_3 <- mean(abs(null_dist_3) >= abs(observed_point_estimate))
 options(digits = 10)  # Increase precision for the output
 print(p_value_3)
 ```
+
+#### Apply lm model where independent variable is food cost, predictors are region, avg. family size and interaction between region and median income
+
+```{r results='asis'}
+cost_lm <- lm(cost_yr ~ region_name + ave_fam_size + log_income, data = food)
+
+cost_lm_summary <- tidy(cost_lm) %>%
+  kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
+  kable_styling(full_width = FALSE,
+                bootstrap_options = "bordered",
+                html_font = "courier") %>%
+  print()
+```
+
+#### Plot interaction between family size and log income
+
+```{r}
+interaction_plot <- ggplot(food, aes(x = cost_yr, y = region_name, color = log_income)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Interaction between Family Size and Log Income",
+       x = "Average Family Size",
+       y = "Log of Income",
+       color = "Food Cost") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"))
+
+interaction_plot
+```
+
+```{r}
+residuals <- ggplot(data = food, aes(x = region_name, y = resid(cost_lm))) +
+  geom_point(color = "lightblue",
+             fill = "indianred2",
+             shape = 21) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +  # Reference line at 0
+  labs(title = "Residuals vs. Region",
+       x = "Region",
+       y = "Residuals") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"))
+
+residuals
+
+# variance of error across regions varies 
+```
+
+
+
+
 
 
 <!-- High level of multicollinearity between region and food cost, and between region and median_income but when adjusted for degrees of freedom, not severe enough to drop the predictors with the high VIF -->
