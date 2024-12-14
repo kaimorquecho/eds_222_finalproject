@@ -116,6 +116,28 @@ income_hist
 -   Alternative Hypothesis (H1): Region does have a significant effect on food cost.
 
 ```{r}
+cost_by_region <- ggplot(food, aes(x = region_name, y = cost_yr, fill = region_name)) +
+  geom_bar(stat = "summary",
+           fun = "mean", 
+           color = "black",
+           fill = c("indianred2",
+                    "skyblue",
+                    "khaki2",
+                    "hotpink",
+                    "seagreen3"),
+             show.legend = FALSE) +
+  labs(title = "Average Food Cost by Region",
+       x = "CA region",
+       y = "Average Food Cost") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(face = "bold"))  
+
+cost_by_region
+```
+
+```{r}
 cost_summary <- food %>%
   group_by(region_name) %>%
   summarize(median_cost = median(cost_yr, na.rm = TRUE))
@@ -254,10 +276,17 @@ options(digits = 10)  # Increase precision for the output
 print(p_value_3)
 ```
 
-#### Apply lm model where independent variable is food cost, predictors are region, avg. family size and interaction between region and median income
+Given the results and p-values from the randomization test, we have strong evidence to reject the Null Hypothesis (H0): Region does not have a significant effect on food cost. It is highly likely that region does significantly affect food costs. 
+
+
+
+
+#### Fit an lm model and explore its suitability for the data
 
 ```{r results='asis'}
 cost_lm <- lm(cost_yr ~ region_name + ave_fam_size + log_income, data = food)
+
+cost_summary <- summary(cost_lm)
 
 cost_lm_summary <- tidy(cost_lm) %>%
   kable(col.names = c("Variable","Estimate","Std.Error", "Statistic","p.value")) %>%
@@ -265,6 +294,28 @@ cost_lm_summary <- tidy(cost_lm) %>%
                 bootstrap_options = "bordered",
                 html_font = "courier") %>%
   print()
+
+
+other_table <- data.frame(
+  Variable = c("Residual Std. Error", 
+               "Multiple R-squared", 
+               "Adjusted R-squared", 
+               "F-statistic", 
+               "P-value"),
+  Estimate = c(cost_summary$sigma, 
+               cost_summary$r.squared, 
+               cost_summary$adj.r.squared, 
+               cost_summary$fstatistic[1], 
+               pf(cost_summary$fstatistic[1], 
+                  cost_summary$fstatistic[2], 
+                  cost_summary$fstatistic[3], 
+                  lower.tail = FALSE))) %>%
+  kable() %>%
+  kable_styling(full_width = FALSE,
+                bootstrap_options = "bordered",
+                html_font = "courier") %>%
+  print()
+
 ```
 
 #### Plot interaction between family size and log income
