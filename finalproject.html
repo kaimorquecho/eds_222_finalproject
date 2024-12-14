@@ -8,7 +8,7 @@
 
 <meta name="dcterms.date" content="2024-12-13">
 
-<title>Analysis of food costs in female-headed households</title>
+<title>What are the major predictors of food security and affordability in California?</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -75,14 +75,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <body>
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-  
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#randomization-test" id="toc-randomization-test" class="nav-link active" data-scroll-target="#randomization-test">Randomization test</a></li>
+  <li><a href="#fit-an-lm-model-and-explore-its-suitability-for-the-data" id="toc-fit-an-lm-model-and-explore-its-suitability-for-the-data" class="nav-link" data-scroll-target="#fit-an-lm-model-and-explore-its-suitability-for-the-data">Fit an lm model and explore its suitability for the data</a></li>
+  </ul>
+</nav>
 </div>
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Analysis of food costs in female-headed households</h1>
+<h1 class="title">What are the major predictors of food security and affordability in California?</h1>
+<p class="subtitle lead">More specifically, how do regional and socioeconomic factors influence food costs in female-headed households?</p>
 </div>
 
 
@@ -267,8 +275,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="randomization-test" class="level4">
-<h4 class="anchored" data-anchor-id="randomization-test">Randomization test</h4>
+<section id="randomization-test" class="level2">
+<h2 class="anchored" data-anchor-id="randomization-test">Randomization test</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the seed for reproducibility</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
@@ -395,7 +403,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-</section>
 <section id="find-p-value" class="level4">
 <h4 class="anchored" data-anchor-id="find-p-value">Find p-value</h4>
 <div class="cell">
@@ -422,8 +429,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Given the results and p-values from the randomization test, we have strong evidence to reject the Null Hypothesis (H0): Region does not have a significant effect on food cost. It is highly likely that region does significantly affect food costs.</p>
 </section>
-<section id="fit-an-lm-model-and-explore-its-suitability-for-the-data" class="level4">
-<h4 class="anchored" data-anchor-id="fit-an-lm-model-and-explore-its-suitability-for-the-data">Fit an lm model and explore its suitability for the data</h4>
+</section>
+<section id="fit-an-lm-model-and-explore-its-suitability-for-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="fit-an-lm-model-and-explore-its-suitability-for-the-data">Fit an lm model and explore its suitability for the data</h2>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cost_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(cost_yr <span class="sc">~</span> region_name <span class="sc">+</span> ave_fam_size <span class="sc">+</span> log_income, <span class="at">data =</span> food)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>cost_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(cost_lm)</span>
@@ -649,20 +657,27 @@ P-value
 </tr>
 </tbody>
 </table>
-</section>
-<section id="plot-interaction-between-family-size-and-log-income" class="level4">
-<h4 class="anchored" data-anchor-id="plot-interaction-between-family-size-and-log-income">Plot interaction between family size and log income</h4>
+<section id="plot-fitted-values-vs-observed" class="level4">
+<h4 class="anchored" data-anchor-id="plot-fitted-values-vs-observed">Plot fitted values vs observed</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>interaction_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(food, <span class="fu">aes</span>(<span class="at">x =</span> cost_yr, <span class="at">y =</span> region_name, <span class="at">color =</span> log_income)) <span class="sc">+</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Interaction between food cost and region"</span>,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Food cost"</span>,</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Region"</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"log(income)"</span>) <span class="sc">+</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>))</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>interaction_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fitted_values <span class="ot">&lt;-</span> <span class="fu">fitted</span>(cost_lm)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>fitted_vs_actual <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> food, <span class="fu">aes</span>(<span class="at">x =</span> cost_yr, <span class="at">y =</span> fitted_values)) <span class="sc">+</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"skyblue"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> <span class="st">"indianred2"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">alpha =</span> <span class="fl">0.7</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape =</span> <span class="dv">21</span>) <span class="sc">+</span>  </span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">se =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>              <span class="at">color =</span> <span class="st">"khaki2"</span>) <span class="sc">+</span>  </span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Fitted values vs observed values for food cost"</span>,</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Observed food cost (cost_yr)"</span>,</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Fitted values (predicted food cost)"</span>) <span class="sc">+</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>))</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>fitted_vs_actual</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -742,6 +757,7 @@ P-value
 <!-- median income, family size female-headed households -->
 <!-- # should try removing the outliers in median_income and affordability food ratio -->
 <!-- # in "ave_fam_size" all races are combined, race variable not ideal in model -->
+</section>
 </section>
 
 </main>

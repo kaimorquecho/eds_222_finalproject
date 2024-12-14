@@ -1,5 +1,6 @@
 ---
-title: "Analysis of food costs in female-headed households"
+title: "What are the major predictors of food security and affordability in California?"
+subtitle: "More specifically, how do regional and socioeconomic factors influence food costs in female-headed households?"
 date: last-modified
 execute: 
   eval: true
@@ -149,7 +150,7 @@ point_estimate_cost # the diff between 2 regions
 
 ```
 
-#### Randomization test
+## Randomization test
 
 ```{r}
 # Set the seed for reproducibility
@@ -280,8 +281,7 @@ Given the results and p-values from the randomization test, we have strong evide
 
 
 
-
-#### Fit an lm model and explore its suitability for the data
+## Fit an lm model and explore its suitability for the data
 
 ```{r results='asis'}
 cost_lm <- lm(cost_yr ~ region_name + ave_fam_size + log_income, data = food)
@@ -318,19 +318,28 @@ other_table <- data.frame(
 
 ```
 
-#### Plot interaction between family size and log income
+#### Plot fitted values vs observed 
 
 ```{r}
-interaction_plot <- ggplot(food, aes(x = cost_yr, y = region_name, color = log_income)) +
-  geom_point(alpha = 0.5) +
-  labs(title = "Interaction between food cost and region",
-       x = "Food cost",
-       y = "Region",
-       color = "log(income)") +
+fitted_values <- fitted(cost_lm)
+
+fitted_vs_actual <- ggplot(data = food, aes(x = cost_yr, y = fitted_values)) +
+  geom_point(color = "skyblue",
+             fill = "indianred2",
+             alpha = 0.7,
+             shape = 21) +  
+  geom_smooth(method = "lm", 
+              se = FALSE, 
+              color = "khaki2") +  
+  labs(title = "Fitted values vs observed values for food cost",
+       x = "Observed food cost (cost_yr)",
+       y = "Fitted values (predicted food cost)") +
   theme_bw() +
   theme(text = element_text(family = "courier"))
 
-interaction_plot
+
+fitted_vs_actual
+
 ```
 
 ```{r}
