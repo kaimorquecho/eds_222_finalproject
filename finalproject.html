@@ -137,7 +137,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    2500   20000   29410   35295   42875  250000 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>food <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">log_income =</span> <span class="fu">log</span>(median_income))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(median_income <span class="sc">&lt;</span> <span class="dv">120000</span>) <span class="sc">%&gt;%</span> <span class="co"># remove outliers, several in the 200000s</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">log_income =</span> <span class="fu">log</span>(median_income))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="reclassify-counties-into-5-regions-not-15" class="level4">
@@ -234,7 +235,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>point_estimate_cost <span class="co"># the diff between 2 regions</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 621.8538</code></pre>
+<pre><code>[1] 661.4388</code></pre>
 </div>
 </div>
 </section>
@@ -376,7 +377,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">10</span>)  <span class="co"># Increase precision for the output</span></span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p_value_1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 1e-04</code></pre>
+<pre><code>[1] 0</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>p_value_2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(null_dist_2) <span class="sc">&gt;=</span> <span class="fu">abs</span>(observed_point_estimate))</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">10</span>)  <span class="co"># Increase precision for the output</span></span>
@@ -388,7 +389,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">10</span>)  <span class="co"># Increase precision for the output</span></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p_value_3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.0018</code></pre>
+<pre><code>[1] 6e-04</code></pre>
 </div>
 </div>
 </section>
@@ -428,16 +429,16 @@ p.value
 (Intercept)
 </td>
 <td style="text-align:right;">
--683.07828680
+-674.11143285
 </td>
 <td style="text-align:right;">
-203.84614735
+210.14811420
 </td>
 <td style="text-align:right;">
--3.3509501929
+-3.2077919682
 </td>
 <td style="text-align:right;">
-0.0008502920
+0.0014021637
 </td>
 </tr>
 <tr>
@@ -445,16 +446,16 @@ p.value
 region_namecentral
 </td>
 <td style="text-align:right;">
--114.74271928
+-122.26686655
 </td>
 <td style="text-align:right;">
-38.16644126
+38.10088257
 </td>
 <td style="text-align:right;">
--3.0063772124
+-3.2090297729
 </td>
 <td style="text-align:right;">
-0.0027421014
+0.0013962344
 </td>
 </tr>
 <tr>
@@ -462,13 +463,13 @@ region_namecentral
 region_namelos_angeles
 </td>
 <td style="text-align:right;">
-304.40080786
+302.65631246
 </td>
 <td style="text-align:right;">
-42.88704622
+43.15684599
 </td>
 <td style="text-align:right;">
-7.0977331084
+7.0129386310
 </td>
 <td style="text-align:right;">
 0.0000000000
@@ -479,16 +480,16 @@ region_namelos_angeles
 region_namesouthern
 </td>
 <td style="text-align:right;">
-46.82024260
+32.92524549
 </td>
 <td style="text-align:right;">
-36.03312128
+36.06920008
 </td>
 <td style="text-align:right;">
-1.2993668308
+0.9128354780
 </td>
 <td style="text-align:right;">
-0.1942623397
+0.3616618900
 </td>
 </tr>
 <tr>
@@ -496,16 +497,16 @@ region_namesouthern
 region_namesuperior
 </td>
 <td style="text-align:right;">
--34.50069128
+-42.37846004
 </td>
 <td style="text-align:right;">
-48.16946143
+47.72851004
 </td>
 <td style="text-align:right;">
--0.7162357696
+-0.8879066201
 </td>
 <td style="text-align:right;">
-0.4740938609
+0.3749139523
 </td>
 </tr>
 <tr>
@@ -513,13 +514,13 @@ region_namesuperior
 ave_fam_size
 </td>
 <td style="text-align:right;">
-2181.34466242
+2177.99200325
 </td>
 <td style="text-align:right;">
-21.25581589
+21.22857606
 </td>
 <td style="text-align:right;">
-102.6234266281
+102.5971783191
 </td>
 <td style="text-align:right;">
 0.0000000000
@@ -530,16 +531,16 @@ ave_fam_size
 log_income
 </td>
 <td style="text-align:right;">
-94.17051461
+95.08898906
 </td>
 <td style="text-align:right;">
-17.65186163
+18.45105882
 </td>
 <td style="text-align:right;">
-5.3348772269
+5.1535789897
 </td>
 <td style="text-align:right;">
-0.0000001307
+0.0000003379
 </td>
 </tr>
 </tbody>

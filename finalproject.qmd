@@ -40,6 +40,7 @@ summary(food$cost_yr)
 summary(food$median_income) 
 
 food <- food %>%
+  filter(median_income < 120000) %>% # remove outliers, several in the 200000s
   mutate(log_income = log(median_income))
 ```
 
