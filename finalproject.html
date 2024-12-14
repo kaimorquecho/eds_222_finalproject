@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2024-12-12">
+<meta name="dcterms.date" content="2024-12-13">
 
 <title>Analysis of food costs in female-headed households</title>
 <style>
@@ -93,7 +93,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 12, 2024</p>
+      <p class="date">December 13, 2024</p>
     </div>
   </div>
   
@@ -394,7 +394,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="apply-lm-model-where-independent-variable-is-food-cost-predictors-are-region-avg.-family-size-and-interaction-between-region-and-median-income" class="level4">
 <h4 class="anchored" data-anchor-id="apply-lm-model-where-independent-variable-is-food-cost-predictors-are-region-avg.-family-size-and-interaction-between-region-and-median-income">Apply lm model where independent variable is food cost, predictors are region, avg. family size and interaction between region and median income</h4>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>cost_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(cost_yr <span class="sc">~</span> region_name <span class="sc">+</span> ave_fam_size <span class="sc">*</span> log_income, <span class="at">data =</span> food)</span>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>cost_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(cost_yr <span class="sc">~</span> region_name <span class="sc">+</span> ave_fam_size <span class="sc">+</span> log_income, <span class="at">data =</span> food)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>cost_lm_summary <span class="ot">&lt;-</span> <span class="fu">tidy</span>(cost_lm) <span class="sc">%&gt;%</span></span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Variable"</span>,<span class="st">"Estimate"</span>,<span class="st">"Std.Error"</span>, <span class="st">"Statistic"</span>,<span class="st">"p.value"</span>)) <span class="sc">%&gt;%</span></span>
@@ -428,16 +428,16 @@ p.value
 (Intercept)
 </td>
 <td style="text-align:right;">
--200.95343885
+-683.07828680
 </td>
 <td style="text-align:right;">
-843.31068433
+203.84614735
 </td>
 <td style="text-align:right;">
--0.2382911098
+-3.3509501929
 </td>
 <td style="text-align:right;">
-0.8117278506
+0.0008502920
 </td>
 </tr>
 <tr>
@@ -445,16 +445,16 @@ p.value
 region_namecentral
 </td>
 <td style="text-align:right;">
--114.61939772
+-114.74271928
 </td>
 <td style="text-align:right;">
-38.18551273
+38.16644126
 </td>
 <td style="text-align:right;">
--3.0016461618
+-3.0063772124
 </td>
 <td style="text-align:right;">
-0.0027846437
+0.0027421014
 </td>
 </tr>
 <tr>
@@ -462,13 +462,13 @@ region_namecentral
 region_namelos_angeles
 </td>
 <td style="text-align:right;">
-304.14781073
+304.40080786
 </td>
 <td style="text-align:right;">
-42.90998046
+42.88704622
 </td>
 <td style="text-align:right;">
-7.0880435617
+7.0977331084
 </td>
 <td style="text-align:right;">
 0.0000000000
@@ -479,16 +479,16 @@ region_namelos_angeles
 region_namesouthern
 </td>
 <td style="text-align:right;">
-45.83779841
+46.82024260
 </td>
 <td style="text-align:right;">
-36.08912630
+36.03312128
 </td>
 <td style="text-align:right;">
-1.2701276841
+1.2993668308
 </td>
 <td style="text-align:right;">
-0.2044780968
+0.1942623397
 </td>
 </tr>
 <tr>
@@ -496,16 +496,16 @@ region_namesouthern
 region_namesuperior
 </td>
 <td style="text-align:right;">
--36.31976943
+-34.50069128
 </td>
 <td style="text-align:right;">
-48.29160091
+48.16946143
 </td>
 <td style="text-align:right;">
--0.7520928847
+-0.7162357696
 </td>
 <td style="text-align:right;">
-0.4522581519
+0.4740938609
 </td>
 </tr>
 <tr>
@@ -513,13 +513,13 @@ region_namesuperior
 ave_fam_size
 </td>
 <td style="text-align:right;">
-2031.43026431
+2181.34466242
 </td>
 <td style="text-align:right;">
-255.32685935
+21.25581589
 </td>
 <td style="text-align:right;">
-7.9561949317
+102.6234266281
 </td>
 <td style="text-align:right;">
 0.0000000000
@@ -530,33 +530,16 @@ ave_fam_size
 log_income
 </td>
 <td style="text-align:right;">
-46.66720674
+94.17051461
 </td>
 <td style="text-align:right;">
-82.53575284
+17.65186163
 </td>
 <td style="text-align:right;">
-0.5654180781
+5.3348772269
 </td>
 <td style="text-align:right;">
-0.5719778747
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-ave_fam_size:log_income
-</td>
-<td style="text-align:right;">
-14.80448473
-</td>
-<td style="text-align:right;">
-25.12666293
-</td>
-<td style="text-align:right;">
-0.5891942266
-</td>
-<td style="text-align:right;">
-0.5559287083
+0.0000001307
 </td>
 </tr>
 </tbody>
@@ -565,12 +548,12 @@ ave_fam_size:log_income
 <section id="plot-interaction-between-family-size-and-log-income" class="level4">
 <h4 class="anchored" data-anchor-id="plot-interaction-between-family-size-and-log-income">Plot interaction between family size and log income</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>interaction_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(food, <span class="fu">aes</span>(<span class="at">x =</span> ave_fam_size, <span class="at">y =</span> log_income, <span class="at">color =</span> cost_yr)) <span class="sc">+</span></span>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>interaction_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(food, <span class="fu">aes</span>(<span class="at">x =</span> cost_yr, <span class="at">y =</span> region_name, <span class="at">color =</span> log_income)) <span class="sc">+</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Interaction between Family Size and Log Income"</span>,</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Average Family Size"</span>,</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Log of Income"</span>,</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Food Cost"</span>) <span class="sc">+</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Interaction between food cost and region"</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Food cost"</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Region"</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"log(income)"</span>) <span class="sc">+</span></span>
 <span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>))</span>
 <span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
@@ -584,7 +567,7 @@ ave_fam_size:log_income
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>residuals <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> food, <span class="fu">aes</span>(<span class="at">x =</span> cost_yr, <span class="at">y =</span> <span class="fu">resid</span>(cost_lm))) <span class="sc">+</span></span>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>residuals_region <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> food, <span class="fu">aes</span>(<span class="at">x =</span> region_name, <span class="at">y =</span> <span class="fu">resid</span>(cost_lm))) <span class="sc">+</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"lightblue"</span>,</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> <span class="st">"indianred2"</span>,</span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape =</span> <span class="dv">21</span>) <span class="sc">+</span></span>
@@ -595,7 +578,7 @@ ave_fam_size:log_income
 <span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
 <span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>))</span>
 <span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>residuals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>residuals_region</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -604,6 +587,48 @@ ave_fam_size:log_income
 </div>
 </div>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># variance of error across regions varies </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>residuals_cost <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> food, <span class="fu">aes</span>(<span class="at">x =</span> cost_yr, <span class="at">y =</span> <span class="fu">resid</span>(cost_lm))) <span class="sc">+</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"lightblue"</span>,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> <span class="st">"indianred2"</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape =</span> <span class="dv">21</span>) <span class="sc">+</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span>  <span class="co"># Reference line at 0</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Residuals vs. Food Cost"</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Food Cost"</span>,</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Residuals"</span>) <span class="sc">+</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>))</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>residuals_cost</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="finalproject_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>residuals_cost <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> food, <span class="fu">aes</span>(<span class="at">x =</span> log_income, <span class="at">y =</span> <span class="fu">resid</span>(cost_lm))) <span class="sc">+</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"lightblue"</span>,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> <span class="st">"indianred2"</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape =</span> <span class="dv">21</span>) <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span>  <span class="co"># Reference line at 0</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Residuals vs. log(income)"</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"log(income)"</span>,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Residuals"</span>) <span class="sc">+</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"courier"</span>))</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>residuals_cost</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="finalproject_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
 </div>
 <!-- High level of multicollinearity between region and food cost, and between region and median_income but when adjusted for degrees of freedom, not severe enough to drop the predictors with the high VIF -->
 <!-- # classify counties by region to make 5 level categorical variable -->

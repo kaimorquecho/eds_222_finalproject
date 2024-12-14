@@ -271,10 +271,10 @@ cost_lm_summary <- tidy(cost_lm) %>%
 ```{r}
 interaction_plot <- ggplot(food, aes(x = cost_yr, y = region_name, color = log_income)) +
   geom_point(alpha = 0.5) +
-  labs(title = "Interaction between Family Size and Log Income",
-       x = "Average Family Size",
-       y = "Log of Income",
-       color = "Food Cost") +
+  labs(title = "Interaction between food cost and region",
+       x = "Food cost",
+       y = "Region",
+       color = "log(income)") +
   theme_bw() +
   theme(text = element_text(family = "courier"))
 
@@ -282,7 +282,7 @@ interaction_plot
 ```
 
 ```{r}
-residuals <- ggplot(data = food, aes(x = region_name, y = resid(cost_lm))) +
+residuals_region <- ggplot(data = food, aes(x = region_name, y = resid(cost_lm))) +
   geom_point(color = "lightblue",
              fill = "indianred2",
              shape = 21) +
@@ -293,15 +293,40 @@ residuals <- ggplot(data = food, aes(x = region_name, y = resid(cost_lm))) +
   theme_bw() +
   theme(text = element_text(family = "courier"))
 
-residuals
+residuals_region
 
 # variance of error across regions varies 
 ```
 
+```{r}
+residuals_cost <- ggplot(data = food, aes(x = cost_yr, y = resid(cost_lm))) +
+  geom_point(color = "lightblue",
+             fill = "indianred2",
+             shape = 21) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +  # Reference line at 0
+  labs(title = "Residuals vs. Food Cost",
+       x = "Food Cost",
+       y = "Residuals") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"))
 
+residuals_cost
+```
 
+```{r}
+residuals_cost <- ggplot(data = food, aes(x = log_income, y = resid(cost_lm))) +
+  geom_point(color = "lightblue",
+             fill = "indianred2",
+             shape = 21) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +  # Reference line at 0
+  labs(title = "Residuals vs. log(income)",
+       x = "log(income)",
+       y = "Residuals") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"))
 
-
+residuals_cost
+```
 
 <!-- High level of multicollinearity between region and food cost, and between region and median_income but when adjusted for degrees of freedom, not severe enough to drop the predictors with the high VIF -->
 
