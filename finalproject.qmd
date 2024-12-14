@@ -108,7 +108,26 @@ income_hist <- ggplot(food, aes(x = median_income)) +
             lwd = 0.5)
 
 income_hist
+
+
+log_hist <- ggplot(food, aes(x = log_income)) +
+  geom_histogram(fill = "lightblue") +
+  labs(title = "Histogram of log(median income)",
+       x = "log(Median income)",
+       y = "Frequency") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"),
+        panel.background = element_rect(fill = "white")) +
+  geom_vline(aes(xintercept = mean(log_income)),
+            color = "black",
+            lwd = 0.5) +
+  geom_vline(aes(xintercept = median(log_income)),
+            color = "indianred2",
+            lwd = 0.5)
+
+log_hist
 ```
+
 
 #### Testing the null hypothesis
 
@@ -372,10 +391,38 @@ residuals_cost <- ggplot(data = food, aes(x = cost_yr, y = resid(cost_lm))) +
   theme(text = element_text(family = "courier"))
 
 residuals_cost
+
+# see residuals by region 
+
+food$residuals <- resid(cost_lm)
+
+residuals_facet <- ggplot(data = food, aes(x = cost_yr, y = residuals, fill = region_name)) +
+  geom_point(alpha = 0.6,
+             shape = 21) +
+  geom_hline(yintercept = 0,
+             linetype = "dashed", 
+             color = "black") +
+  labs(title = "Residuals vs. food cost by region",
+       x = "Food Cost",
+       y = "Residuals") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"),
+        legend.position = "none",
+        strip.text = element_text(size = 10)) +
+  scale_fill_manual(values = c("indianred2",
+                               "skyblue",
+                               "khaki2",
+                               "hotpink",
+                               "seagreen3")) +
+  facet_wrap(~ region_name, 
+             scales = "free_y") 
+
+residuals_facet
+
 ```
 
 ```{r}
-residuals_cost <- ggplot(data = food, aes(x = log_income, y = resid(cost_lm))) +
+residuals_log <- ggplot(data = food, aes(x = log_income, y = resid(cost_lm))) +
   geom_point(color = "lightblue",
              fill = "indianred2",
              shape = 21) +
@@ -386,7 +433,37 @@ residuals_cost <- ggplot(data = food, aes(x = log_income, y = resid(cost_lm))) +
   theme_bw() +
   theme(text = element_text(family = "courier"))
 
-residuals_cost
+residuals_log
+```
+
+```{r}
+test_lm <- lm(cost_yr ~ region_name + ave_fam_size + log_income + log_income * region_name + ave_fam_size * region_name, data = food)
+
+
+food$test_residuals <- resid(test_lm)
+
+test_facet <- ggplot(data = food, aes(x = cost_yr, y = test_residuals, fill = region_name)) +
+  geom_point(alpha = 0.6,
+             shape = 21) +
+  geom_hline(yintercept = 0,
+             linetype = "dashed", 
+             color = "black") +
+  labs(title = "Residuals vs. food cost by region (test model)",
+       x = "Food Cost",
+       y = "Residuals") +
+  theme_bw() +
+  theme(text = element_text(family = "courier"),
+        legend.position = "none",
+        strip.text = element_text(size = 10)) +
+  scale_fill_manual(values = c("indianred2",
+                               "skyblue",
+                               "khaki2",
+                               "hotpink",
+                               "seagreen3")) +
+  facet_wrap(~ region_name, 
+             scales = "free_y") 
+
+test_facet
 ```
 
 <!-- High level of multicollinearity between region and food cost, and between region and median_income but when adjusted for degrees of freedom, not severe enough to drop the predictors with the high VIF -->
